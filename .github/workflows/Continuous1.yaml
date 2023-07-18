@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
@@ -23,13 +23,14 @@ jobs:
 
       - name: List Folders
         id: list_folders
-        uses: ./.github/actions/list-folders
+        run: node ./.github/actions/list-folders.js
+        continue-on-error: true  # Continue on error since the action may not be available on the first run
 
       - name: Show Folder Selection
         id: folder_selection
         run: |
           # Use echo to set the output as a JSON array
-          echo "::set-output name=selected_folder::${{ steps.list_folders.outputs.folders }}"
+          echo "::set-output name=selected_folder::$(echo "${{ steps.list_folders.outputs.stdout }}" | jq -r '.[]')"
 
       - name: Display Folder Selection
         run: |
