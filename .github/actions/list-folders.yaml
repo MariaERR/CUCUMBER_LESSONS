@@ -13,9 +13,9 @@ runs:
         node-version: 14
 
     - name: 'List Folders'
+      id: list_folders
       run: |
         cd ./src/Features/tas-apis
         FOLDERS=$(ls -d */ | sed 's#/##')
-        echo "Folder list: $FOLDERS"
-        echo "::set-output name=folders::$(echo $FOLDERS | jq -R -c 'split(" ")')"  # Convert space-separated folders to JSON array
+        echo "::set-output name=folders::$FOLDERS"  # Set the folders as an output
 
