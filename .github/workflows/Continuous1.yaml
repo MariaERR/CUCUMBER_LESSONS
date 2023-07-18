@@ -7,7 +7,10 @@ on:
         description: 'Select the folder to execute tests'
         required: true
         type: choice  # Set the input type to 'choice'
-        options: ${{ steps.list_folders.outputs.folders }} # Populate the dropdown list with folder names
+        options:
+          - foo
+          - bar
+          - baz
 
 jobs:
   build:
@@ -16,13 +19,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
-      - name: Check if tas-apis directory exists
-        run: |
-          if [ ! -d "./src/Features/tas-apis" ]; then
-            echo "Error: tas-apis directory not found."
-            exit 1
-          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -40,4 +36,16 @@ jobs:
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          FOLDERS=$(echo ${{ steps.list
+          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }} | tr '\n' ',' | sed 's/,$//')
+          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::$FOLDERS")
+
+      - name: Display Folder Selection
+        run: |
+          echo "Selected folder: ${{ github.event.inputs.folder-name }}"
+          echo "::set-output name=selected_folder::${{ github.event.inputs.folder-name }}"
+
+      - name: Run Tests
+        run: |
+          cd ./src
+          npm install
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
