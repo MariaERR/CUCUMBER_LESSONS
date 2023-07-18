@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@cucumber/cucumber": "^9.2.0"
+    "@cucumber/cucumber": "^9.2.0",
+    "@actions/core": "^1.0.0"
   },
   "dependencies": {
     "hamjest": "^4.0.1"
