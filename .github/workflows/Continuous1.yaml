@@ -6,6 +6,7 @@ on:
       folder-name:
         description: 'Select the folder to execute tests'
         required: true
+        type: choice  # Set the input type to 'choice'
 
 jobs:
   build:
@@ -24,17 +25,24 @@ jobs:
         id: list_folders
         run: |
           cd ./src/Features/tas-apis
-          $folders = Get-ChildItem -Directory | ForEach-Object { $_.Name }
-          $folders -join ","
-          echo "::set-output name=folders::$folders"
+          FOLDERS=$(ls -d */ | sed 's#/##')
+          echo "Folder list: $FOLDERS"
+          echo "::set-output name=folders::$FOLDERS"
 
-          
       - name: Show Folder Selection
         id: folder_selection
         run: |
           FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
-          FOLDER_LIST=(${FOLDERS// / })
-          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::{\"value\": \"${FOLDER_LIST[@]}\"}")
+          FOLDER_LIST=(${FOLDERS// / })  # Convert the space-separated string to an array
+          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::$FOLDER_LIST")
 
       - name: Display Folder Selection
         run: |
+          echo "Selected folder: ${{ github.event.inputs.folder-name }}"
+          echo "::set-output name=selected_folder::${{ github.event.inputs.folder-name }}"
+
+      - name: Run Tests
+        run: |
+          cd ./src
+          npm install
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
