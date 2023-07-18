@@ -20,7 +20,7 @@ jobs:
           node-version: 14
 
       - name:   Run Tests
-        run :  |
+        run: |
           npm install
           cd ./src
-          run: npm test ${{ github.event.inputs.folder-name }}
+          npm run test ${{ github.event.inputs.folder-name }}
