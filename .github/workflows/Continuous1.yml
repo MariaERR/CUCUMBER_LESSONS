@@ -2,7 +2,10 @@ name: Run-tests-workflow
 
 on:
   workflow_dispatch:
-  
+   inputs:
+      folder-name:
+        description: 'Enter the API name to execute'
+        required: true
 jobs:
   build:
     runs-on: windows-latest
