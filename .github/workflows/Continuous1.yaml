@@ -28,9 +28,10 @@ jobs:
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }} | jq -r '.[]')
+          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
+          echo "Available folders: $FOLDERS"
           FOLDER_LIST=($FOLDERS)
-          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::$FOLDER_LIST")
+          echo "::set-output name=selected_folder::$FOLDER_LIST"
 
       - name: Display Folder Selection
         run: |
