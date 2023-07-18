@@ -2,6 +2,10 @@ name: Run-tests-workflow
 
 on:
   workflow_dispatch:
+    inputs:
+      folder-name:
+        description: 'Select the folder to execute tests'
+        required: true
 
 jobs:
   build:
@@ -16,25 +20,33 @@ jobs:
         with:
           node-version: 14
 
-      - name: Install actions/core
-        run: npm install @actions/core
-
       - name: List Folders
         id: list_folders
-        uses: ./.github/actions/list-folders
-        with:
-          folder-list: src/Features/tas-apis/*/
+        run: |
+          if [ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "win32" ]; then
+            # Windows (using PowerShell)
+            cd ./src/Features/tas-apis
+            $folders = Get-ChildItem -Directory | ForEach-Object { $_.Name }
+            echo "Folder list: $folders"
+            echo "::set-output name=folders::$folders"
+          else
+            # Linux and macOS
+            cd ./src/Features/tas-apis
+            folders=$(ls -d */ | sed 's#/##')
+            echo "Folder list: $folders"
+            echo "::set-output name=folders::$folders"
+          fi
 
-      - name: Select Folder
+      - name: Show Input Form
         id: folder_selection
         run: |
-          echo "::set-output name=folder-selection::$INPUT_FOLDER_SELECTION"
-
-        env:
-          INPUT_FOLDER_SELECTION: ${{ fromJson(steps.list_folders.outputs.folder-selection) }}
+          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
+          FOLDER_LIST=(${FOLDERS// / })
+          echo "Folder list: ${FOLDER_LIST[@]}"
+          echo "::set-output name=selected_folder::${FOLDER_LIST[@]}"
 
       - name: Run Tests
         run: |
           cd ./src
           npm install
-          npm run test ${{ env.INPUT_FOLDER_SELECTION }}
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder).value }}
