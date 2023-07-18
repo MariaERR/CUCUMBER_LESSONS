@@ -7,7 +7,7 @@ shout(message){
 }
 messaheHeard()
 {
-    return []
+    return ["free bagels at Sean's"]
 }
 }
 module.exports=Person
