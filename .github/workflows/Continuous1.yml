@@ -6,7 +6,6 @@ on:
       folder-name:
         description: 'Select the folder to execute tests'
         required: true
-        default: 'sgnum'  # Default folder to be displayed in the dropdown
 
 jobs:
   build:
@@ -30,13 +29,13 @@ jobs:
           echo "::set-output name=folders::$FOLDERS"
 
       - name: Show Folder Selection
+        id: folder_selection
         run: |
           FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
           FOLDER_LIST=(${FOLDERS// / })
-          echo "::set-output name=selected_folder::${FOLDER_LIST[@]}"
+          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::{\"value\": \"${FOLDER_LIST[@]}\"}")
 
-      - name: Show Input Form
-        id: folder_selection
+      - name: Display Folder Selection
         run: |
           echo "Selected folder: ${{ github.event.inputs.folder-name }}"
           echo "::set-output name=selected_folder::${{ github.event.inputs.folder-name }}"
@@ -45,4 +44,4 @@ jobs:
         run: |
           cd ./src
           npm install
-          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder).value }}
