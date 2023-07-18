@@ -1,0 +1,21 @@
+# .github/actions/list-folders.yaml
+name: 'List Folders'
+description: 'List folders under tas-apis'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Checkout Repository'
+      uses: actions/checkout@v2
+
+    - name: 'Set up Node.js'
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+
+    - name: 'List Folders'
+      run: |
+        cd ./src/Features/tas-apis
+        FOLDERS=$(ls -d */ | sed 's#/##')
+        echo "Folder list: $FOLDERS"
+        echo "::set-output name=folders::$FOLDERS"
