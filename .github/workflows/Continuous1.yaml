@@ -23,14 +23,16 @@ jobs:
 
       - name: List Folders
         id: list_folders
-        run: node ./.github/actions/list-folders.js
-        continue-on-error: true  # Continue on error since the action may not be available on the first run
+        run: |
+          # Set an environment variable with the folder list
+          FOLDERS=$(cd ./src/Features/tas-apis && ls -d */ | sed 's#/##')
+          echo "FOLDERS=$FOLDERS" >> $GITHUB_ENV
 
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          # Use echo to set the output as a JSON array
-          echo "::set-output name=selected_folder::$(echo "${{ steps.list_folders.outputs.stdout }}" | jq -r '.[]')"
+          # Get the environment variable and store it as an output
+          echo "::set-output name=selected_folder::$FOLDERS"
 
       - name: Display Folder Selection
         run: |
