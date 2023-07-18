@@ -25,7 +25,7 @@ jobs:
         id: list_folders
         run: |
           cd ./src/Features/tas-apis
-          FOLDERS=$(find . -type d -maxdepth 1 | sed 's#\./##' | grep -vE '^\.$')
+          FOLDERS=$(find * -type d -maxdepth 0)
           echo "Folder list: $FOLDERS"
           echo "::set-output name=folders::$FOLDERS"
 
@@ -33,7 +33,7 @@ jobs:
         id: folder_selection
         run: |
           FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
-          FOLDER_LIST=(${FOLDERS// / })  # Convert the space-separated string to an array
+          FOLDER_LIST=($FOLDERS)
           SELECTED_FOLDER=$(echo "::set-output name=selected_folder::$FOLDER_LIST")
 
       - name: Display Folder Selection
