@@ -25,9 +25,17 @@ jobs:
         id: list_folders
         run: |
           cd ./src/Features/tas-apis
-          FOLDERS=$(for /D %%i in (*) do @echo %%~nxi)
-          echo "Folder list: $FOLDERS"
-          echo "::set-output name=folders::$FOLDERS"
+          if [ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "win32" ]; then
+            # Windows (using PowerShell)
+            $FOLDERS = Get-ChildItem -Directory | ForEach-Object { $_.Name }
+            echo "Folder list: $FOLDERS"
+            echo "::set-output name=folders::$FOLDERS"
+          else
+            # Linux and macOS
+            FOLDERS=$(ls -d */ | sed 's#/##')
+            echo "Folder list: $FOLDERS"
+            echo "::set-output name=folders::$FOLDERS"
+          fi
 
       - name: Show Folder Selection
         id: folder_selection
