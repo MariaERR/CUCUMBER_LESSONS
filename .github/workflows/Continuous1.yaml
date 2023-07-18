@@ -6,7 +6,11 @@ on:
       folder-name:
         description: 'Select the folder to execute tests'
         required: true
-        type: string  # Set the input type to 'string'
+        type: choice  # Set the input type to 'choice'
+        options:
+          - foo
+          - bar
+          - baz
 
 jobs:
   build:
@@ -25,15 +29,15 @@ jobs:
         id: list_folders
         run: |
           cd ./src/Features/tas-apis
-          FOLDERS=$(for /D %%i in (*) do @echo %%~nxi)
+          FOLDERS=$(ls -d */ | sed 's#/##')
           echo "Folder list: $FOLDERS"
           echo "::set-output name=folders::$FOLDERS"
 
       - name: Show Folder Selection
         id: folder_selection
-        uses: MariaERR/CUCUMBER_LESSONS/.github/actions/dropdown-list@main
-        with:
-          folder-list: ${{ steps.list_folders.outputs.folders }}
+        run: |
+          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }} | tr '\n' ',' | sed 's/,$//')
+          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::$FOLDERS")
 
       - name: Display Folder Selection
         run: |
