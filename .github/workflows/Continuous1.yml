@@ -1,3 +1,4 @@
+# .github/workflows/main.yml
 name: Run-tests-workflow
 
 on:
@@ -22,11 +23,7 @@ jobs:
 
       - name: List Folders
         id: list_folders
-        run: |
-          cd ./src/Features/tas-apis
-          FOLDERS=$(ls -d */ | sed 's#/##')
-          echo "Folder list: $FOLDERS"
-          echo "::set-output name=folders::$FOLDERS"
+        uses: ./.github/actions/list-folders
 
       - name: Show Folder Selection
         id: folder_selection
