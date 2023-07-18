@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "cucumber-js"
+   "test:report": "cucumber-js"
   },
   "keywords": [],
   "author": "",
