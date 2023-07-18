@@ -18,6 +18,6 @@ jobs:
 
       - name:   Run Tests
         run: |
+          cd ./src
           npm install
-          cd src
           npm run test
