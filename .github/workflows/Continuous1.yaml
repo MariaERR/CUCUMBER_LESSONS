@@ -28,7 +28,7 @@ jobs:
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
+          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }} | jq -r '.[]')
           FOLDER_LIST=(${FOLDERS// / })  # Convert the space-separated string to an array
           SELECTED_FOLDER=$(echo "::set-output name=selected_folder::$FOLDER_LIST")
 
