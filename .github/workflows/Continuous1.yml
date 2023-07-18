@@ -2,11 +2,6 @@ name: Run-tests-workflow
 
 on:
   workflow_dispatch:
-    inputs:
-      folder-name:
-        description: 'Select the folder to execute tests'
-        required: true
-        default: 'Choose a folder'
 
 jobs:
   build:
@@ -21,8 +16,21 @@ jobs:
         with:
           node-version: 14
 
-      - name:   Run Tests
+      - name: List Folders
+        id: list_folders
+        run: |
+          cd ./src/Features/tas-apis
+          echo "::set-output name=folders::$(ls -d */ | sed 's#/##')"
+
+      - name: Select Folder
+        id: folder_selection
+        run: |
+          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
+          FOLDER_LIST=(${FOLDERS// /$'\n'})
+          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::{\"value\": \"${FOLDER_LIST[@]}\"}")
+
+      - name: Run Tests
         run: |
           cd ./src
           npm install
-          npm run test ${{ env.FOLDER_TO_EXECUTE }}
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder).value }}
