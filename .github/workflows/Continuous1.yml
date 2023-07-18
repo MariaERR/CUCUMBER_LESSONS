@@ -2,6 +2,11 @@ name: Run-tests-workflow
 
 on:
   workflow_dispatch:
+    inputs:
+      folder-name:
+        description: 'Select the folder to execute tests'
+        required: true
+        default: 'Choose a folder'
 
 jobs:
   build:
@@ -20,4 +25,4 @@ jobs:
         run: |
           cd ./src
           npm install
-          npm run test
+          npm run test ${{ env.FOLDER_TO_EXECUTE }}
