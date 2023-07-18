@@ -12,10 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        folder-name: ['folder1', 'folder2', 'folder3'] # Add your folder names here
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -25,18 +21,24 @@ jobs:
         with:
           node-version: 14
 
+      - name: List Folders
+        id: list_folders
+        uses: ./.github/actions/list-folders
+
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          # Get the folder name from the matrix strategy and store it as an output
-          echo "::set-output name=selected_folder::${{ matrix.folder-name }}"
+          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
+          FOLDER_LIST=(${FOLDERS// / })  # Convert the space-separated string to an array
+          echo "::set-output name=selected_folder::$FOLDER_LIST"
 
       - name: Display Folder Selection
         run: |
-          echo "Selected folder: ${{ steps.folder_selection.outputs.selected_folder }}"
+          echo "Selected folder: ${{ github.event.inputs.folder-name }}"
+          echo "::set-output name=selected_folder::${{ github.event.inputs.folder-name }}"
 
       - name: Run Tests
         run: |
           cd ./src
           npm install
-          npm run test ${{ steps.folder_selection.outputs.selected_folder }}
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
