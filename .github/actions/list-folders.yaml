@@ -1,4 +1,3 @@
-# .github/actions/list-folders.yaml
 name: 'List Folders'
 description: 'List folders under tas-apis'
 
@@ -18,4 +17,5 @@ runs:
         cd ./src/Features/tas-apis
         FOLDERS=$(ls -d */ | sed 's#/##')
         echo "Folder list: $FOLDERS"
-        echo "::set-output name=folders::$FOLDERS"
+        echo "::set-output name=folders::$(echo $FOLDERS | jq -R -c 'split(" ")')"  # Convert space-separated folders to JSON array
+
