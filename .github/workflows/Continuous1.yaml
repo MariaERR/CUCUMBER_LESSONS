@@ -6,7 +6,7 @@ on:
       folder-name:
         description: 'Select the folder to execute tests'
         required: true
-        type: choice  # Set the input type to 'choice'
+        type: string  # Set the input type to 'string'
 
 jobs:
   build:
@@ -25,23 +25,15 @@ jobs:
         id: list_folders
         run: |
           cd ./src/Features/tas-apis
-          if [ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "win32" ]; then
-            # Windows (using PowerShell)
-            $FOLDERS = Get-ChildItem -Directory | ForEach-Object { $_.Name }
-            echo "Folder list: $FOLDERS"
-            echo "::set-output name=folders::$FOLDERS"
-          else
-            # Linux and macOS
-            FOLDERS=$(ls -d */ | sed 's#/##')
-            echo "Folder list: $FOLDERS"
-            echo "::set-output name=folders::$FOLDERS"
-          fi
+          FOLDERS=$(for /D %%i in (*) do @echo %%~nxi)
+          echo "Folder list: $FOLDERS"
+          echo "::set-output name=folders::$FOLDERS"
 
       - name: Show Folder Selection
         id: folder_selection
-        run: |
-          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }} | tr '\n' ',' | sed 's/,$//')
-          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::$FOLDERS")
+        uses: MariaERR/CUCUMBER_LESSONS/.github/actions/dropdown-list@main
+        with:
+          folder-list: ${{ steps.list_folders.outputs.folders }}
 
       - name: Display Folder Selection
         run: |
