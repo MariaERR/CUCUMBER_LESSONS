@@ -1,0 +1,6 @@
+name: 'List Folders'
+description: 'List folders under tas-apis'
+
+runs:
+  using: 'node12'
+  main: 'index.js'
