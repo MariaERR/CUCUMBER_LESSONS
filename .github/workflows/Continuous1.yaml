@@ -24,9 +24,10 @@ jobs:
         id: list_folders
         run: |
           cd ./src/Features/tas-apis
-          FOLDERS=$(ls -d */ | sed 's#/##')
-          echo "Folder list: $FOLDERS"
-          echo "::set-output name=folders::$FOLDERS"
+          $folders = Get-ChildItem -Directory | ForEach-Object { $_.Name }
+          $folders -join ","
+          echo "::set-output name=folders::$folders"
+
           
       - name: Show Folder Selection
         id: folder_selection
