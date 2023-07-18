@@ -25,7 +25,7 @@ jobs:
         id: list_folders
         run: |
           cd ./src/Features/tas-apis
-          FOLDERS=$(ls -d */ | sed 's#/##')
+          FOLDERS=$(find . -type d -maxdepth 1 | sed 's#\./##' | grep -vE '^\.$')
           echo "Folder list: $FOLDERS"
           echo "::set-output name=folders::$FOLDERS"
 
