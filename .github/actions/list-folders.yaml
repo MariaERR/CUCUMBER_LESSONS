@@ -18,5 +18,5 @@ runs:
         cd ./src/Features/tas-apis
         FOLDERS=$(ls -d */ | sed 's#/##')
         # Convert the space-separated string to a JSON array and set it as an output
-        FOLDER_LIST=$(echo $FOLDERS | jq -R . | jq -c .)
+        FOLDER_LIST="[\"$(echo "$FOLDERS" | sed 's/ /", "/g')\"]"
         echo "::set-output name=folders::$FOLDER_LIST"
