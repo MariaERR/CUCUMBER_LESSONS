@@ -12,6 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        folder-name: ['folder1', 'folder2', 'folder3'] # Add your folder names here
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -21,26 +25,18 @@ jobs:
         with:
           node-version: 14
 
-      - name: List Folders
-        id: list_folders
-        run: |
-          # Set an environment variable with the folder list
-          FOLDERS=$(cd ./src/Features/tas-apis && ls -d */ | sed 's#/##')
-          echo "FOLDERS=$FOLDERS" >> $GITHUB_ENV
-
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          # Get the environment variable and store it as an output
-          echo "::set-output name=selected_folder::$FOLDERS"
+          # Get the folder name from the matrix strategy and store it as an output
+          echo "::set-output name=selected_folder::${{ matrix.folder-name }}"
 
       - name: Display Folder Selection
         run: |
-          echo "Selected folder: ${{ github.event.inputs.folder-name }}"
-          echo "::set-output name=selected_folder::${{ github.event.inputs.folder-name }}"
+          echo "Selected folder: ${{ steps.folder_selection.outputs.selected_folder }}"
 
       - name: Run Tests
         run: |
           cd ./src
           npm install
-          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
+          npm run test ${{ steps.folder_selection.outputs.selected_folder }}
