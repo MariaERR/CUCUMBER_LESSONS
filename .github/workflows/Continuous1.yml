@@ -19,10 +19,8 @@ jobs:
         with:
           node-version: 14
 
-      - name: Install Dependencies
-        run: npm install
-
       - name:   Run Tests
         run :  |
-           cd ./src
-           run: npm test ${{ github.event.inputs.folder-name }}
+          npm install
+          cd ./src
+          run: npm test ${{ github.event.inputs.folder-name }}
