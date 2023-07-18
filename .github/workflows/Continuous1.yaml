@@ -19,9 +19,7 @@ jobs:
 
       - name: Check if tas-apis directory exists
         run: |
-          if [ -d "./src/Features/tas-apis" ]; then
-            echo "tas-apis directory exists."
-          else
+          if [ ! -d "./src/Features/tas-apis" ]; then
             echo "Error: tas-apis directory not found."
             exit 1
           fi
@@ -41,3 +39,5 @@ jobs:
 
       - name: Show Folder Selection
         id: folder_selection
+        run: |
+          FOLDERS=$(echo ${{ steps.list
