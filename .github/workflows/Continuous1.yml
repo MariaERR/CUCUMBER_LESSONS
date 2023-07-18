@@ -19,5 +19,5 @@ jobs:
       - name:   Run Tests
         run: |
           npm install
-          cd CUCUMBER_LESSONS/src
+          cd src
           npm run test
