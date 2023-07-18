@@ -6,6 +6,7 @@ on:
       folder-name:
         description: 'Select the folder to execute tests'
         required: true
+        default: 'sgnum'  # Default folder to be displayed in the dropdown
 
 jobs:
   build:
@@ -23,30 +24,25 @@ jobs:
       - name: List Folders
         id: list_folders
         run: |
-          if [ "$OSTYPE" == "msys" ] || [ "$OSTYPE" == "win32" ]; then
-            # Windows (using PowerShell)
-            cd ./src/Features/tas-apis
-            $folders = Get-ChildItem -Directory | ForEach-Object { $_.Name }
-            echo "Folder list: $folders"
-            echo "::set-output name=folders::$folders"
-          else
-            # Linux and macOS
-            cd ./src/Features/tas-apis
-            folders=$(ls -d */ | sed 's#/##')
-            echo "Folder list: $folders"
-            echo "::set-output name=folders::$folders"
-          fi
+          cd ./src/Features/tas-apis
+          FOLDERS=$(ls -d */ | sed 's#/##')
+          echo "Folder list: $FOLDERS"
+          echo "::set-output name=folders::$FOLDERS"
+
+      - name: Show Folder Selection
+        run: |
+          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
+          FOLDER_LIST=(${FOLDERS// / })
+          echo "::set-output name=selected_folder::${FOLDER_LIST[@]}"
 
       - name: Show Input Form
         id: folder_selection
         run: |
-          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
-          FOLDER_LIST=(${FOLDERS// / })
-          echo "Folder list: ${FOLDER_LIST[@]}"
-          echo "::set-output name=selected_folder::${FOLDER_LIST[@]}"
+          echo "Selected folder: ${{ github.event.inputs.folder-name }}"
+          echo "::set-output name=selected_folder::${{ github.event.inputs.folder-name }}"
 
       - name: Run Tests
         run: |
           cd ./src
           npm install
-          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder).value }}
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
