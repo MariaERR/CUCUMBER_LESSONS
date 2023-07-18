@@ -6,18 +6,32 @@ on:
 jobs:
   test:
     runs-on: windows-latest
+    environment: SIT
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+     - name: Checkout Repository
+       uses: actions/checkout@v3
+     - name: Steup Node js
+       uses: actions/setup-node@v3
+       with:
+         node-version: 18
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run Tests
-        run: npm test
+     - name: Run tests
+       env:
+         HOST: ${{ secrets.HOST }}
+         KEY: ${{ secrets.KEY }}
+         SECRET: ${{ secrets.SECRET }}
+       run: |
+           cd ./src
+           npm install
+           npm run test:report
+          
+     - name: Export Cucumber Reports using Xray-action
+       uses: mikepenz/xray-action@v2.4.5
+       with: 
+         username: ${{secrets.ID}}
+         password: ${{secrets.API_KEY}}
+         testFormat: "cucumber"
+         testPaths: "**/reports/*.json"
+         projectKey: "MD"
+         testExecKey: "MD-3300"
