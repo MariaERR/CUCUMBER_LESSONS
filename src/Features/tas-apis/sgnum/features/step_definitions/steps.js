@@ -1,5 +1,5 @@
    
-const Person= require ('../../../../../src/shouty.js')
+const Person= require ('../../../shouty.js')
 const {Given, When, Then} = require ('@cucumber/cucumber')
 const {assertThat, is}=require ('hamjest')
 
