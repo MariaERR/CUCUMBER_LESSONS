@@ -27,6 +27,6 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd ./src
+          cd src
           npm install
           npm run test ${{ github.event.inputs.folder-name }}
