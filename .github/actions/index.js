@@ -1,6 +1,16 @@
 const core = require('@actions/core');
 
-const folderNames = core.getInput('folder-names');
-const folders = folderNames.split(',');
+async function run() {
+  try {
+    const folderName = core.getInput('folder-name');
+    const folders = folderName.split(',');
 
-core.setOutput('selected_folders', JSON.stringify(folders));
+    core.debug(`Selected Folders: ${folders}`);
+
+    core.setOutput('folders', JSON.stringify(folders));
+  } catch (error) {
+    core.setFailed(error.message);
+  }
+}
+
+run();
