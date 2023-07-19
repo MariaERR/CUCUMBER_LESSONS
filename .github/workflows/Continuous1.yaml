@@ -10,7 +10,7 @@ on:
         type: boolean
         description: True or False
       folder-name:
-        type: multi-choice
+        type: choice
         description: 'Select the folder to execute tests'
         options:
           - sgnum
@@ -38,6 +38,14 @@ jobs:
         run: |
           FOLDERS=$(echo "${{ steps.list_folders.outputs.stdout }}" | tr '\n' ',')
           echo "::set-output name=folders::$FOLDERS"
+          echo "::set-output name=folders::$FOLDERS"
+
+      - name: Run Tests
+        run: |
+          cd ./src/Features/tas-apis/${{ github.event.inputs.folder-name }}
+          npm install
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
+          echo "Selected Folder: ${{ steps.folder_selection.outputs.selected_folder }}"
 
       - name: greet
         run: | 
