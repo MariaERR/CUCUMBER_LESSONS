@@ -9,8 +9,8 @@ on:
         type: choice
         options:
           - sgnum
-          - sgnum2
-          - sgnum3
+          - Test2
+      
 
 jobs:
   build:
