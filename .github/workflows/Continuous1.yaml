@@ -6,6 +6,8 @@ on:
       folder-names:
         description: 'Select the folders to execute tests'
         required: true
+        type: string
+        default: 'sgnum' # Default value to avoid error when no folder is selected
 
 jobs:
   build:
@@ -20,22 +22,14 @@ jobs:
         with:
           node-version: 14
 
-      - name: List Folders
-        id: list_folders
+      - name: Run Tests
         run: |
-          cd ./src/Features/tas-apis
-          FOLDERS=$(ls -d */ | sed 's#/##')
-          echo "Folder list: $FOLDERS"
-          echo "::set-output name=folders::$FOLDERS"
+          # Convert the comma-separated list of folders to an array
+          IFS=',' read -ra FOLDERS <<< "${{ github.event.inputs.folder-names }}"
 
-      - name: Show Folder Selection
-        id: folder_selection
-        run: |
-          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }} | tr '\n' ',' | sed 's/,$//')
-          echo "Folder list for selection: $FOLDERS"
-          echo "::set-output name=selected_folder::$FOLDERS"
-
-      - name: Display Folder Selection
-        run: |
-          echo "Selected folders: ${{ github.event.inputs.folder-names }}"
-          echo "::set-output name=selected_folder::${{ github.event.inputs.folder-names }}"
+          # Loop through the selected folders and execute tests
+          for folder in "${FOLDERS[@]}"; do
+            cd "./src/Features/tas-apis/${folder}"
+            npm install
+            npm run test
+          done
