@@ -24,36 +24,34 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      # ... (previous steps remain unchanged)
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-
-      - name: greet
-        run: | 
-          echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
-          echo "boolean is ${{ github.event.inputs.boolean }}" / ${{ inputs.boolean }} 
-          echo "choice is ${{ github.event.inputs.folder-name }}" / ${{ inputs.folder-name }}
-          
       - name: Run Tests
         run: |
           cd ./src
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
           echo "FOLDER_NAME: $env:FOLDER_NAME"
-
-          if (${{ github.event.inputs.all-tests }} == 'true') {
-            $env:FEATURE_PATH="./Features/tas-apis"
-          } else {
-            $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
-          }
+          $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
           echo "FEATURE_PATH: $env:FEATURE_PATH"
 
-          if (${{ github.event.inputs.nonreg }} == 'true') {
-            npm run test "./src/Features/tas-apis/${{ github.event.inputs.folder-name }}/features/**/*.feature --tags @Nonreg"
+          $featureFiles = @()
+          foreach ($file in (Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse)) {
+            $featureFiles += $file.FullName
+          }
+          $env:FEATURE_FILES_STRING = $featureFiles -join ','
+          echo "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
+
+          # Run the tests only if there are feature files in the selected folder
+          if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
+            $cucumberOptions = ""
+            if (${{ github.event.inputs.nonreg }} -eq 'true') {
+              $cucumberOptions += "--tags @Nonreg "
+            }
+            if (${{ github.event.inputs.all-tests }} -eq 'true') {
+              $cucumberOptions += "--tags '' "
+            }
+            npm run test $env:FEATURE_FILES_STRING $cucumberOptions
           } else {
-            npm run test "./src/Features/tas-apis/${{ github.event.inputs.folder-name }}/features/**/*.feature"
+            echo "No feature files found in the selected folder."
           }
