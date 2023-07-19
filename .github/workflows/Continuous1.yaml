@@ -35,11 +35,6 @@ jobs:
           echo "boolean is ${{ github.event.inputs.boolean }}" / ${{ inputs.boolean }} 
           echo "choice is ${{ github.event.inputs.folder-name }}" / ${{ inputs.folder-name }}
           
-          
-      - name: Run Tests
-        run: |
-                 
-          
       - name: Run Tests
         run: |
           cd ./src
