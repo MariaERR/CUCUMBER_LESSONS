@@ -42,11 +42,12 @@ jobs:
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
           $env:FEATURE_PATH="./Features/tas-apis/$FOLDER_NAME/features"
-          $env:FEATURE_FILES=$(Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName } -join ',')
+          $env:FEATURE_FILES=$(Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName })
+          $env:FEATURE_FILES_STRING = ($env:FEATURE_FILES -join ',')
 
           # Run the tests only if there are feature files in the selected folder
-          bash -c 'if [ -n "$FEATURE_FILES" ]; then
-            npm run test $FEATURE_FILES
+          bash -c 'if [ -n "$env:FEATURE_FILES_STRING" ]; then
+            npm run test $env:FEATURE_FILES_STRING
           else
             echo "No feature files found in the selected folder."
           fi'
