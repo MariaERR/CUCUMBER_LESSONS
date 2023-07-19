@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 const tasApisDir = './src/Features/tas-apis';
 
@@ -9,8 +10,9 @@ fs.readdir(tasApisDir, (err, files) => {
   }
 
   const folders = files.filter((file) => {
-    return fs.statSync(`${tasApisDir}/${file}`).isDirectory();
+    return fs.statSync(path.join(tasApisDir, file)).isDirectory();
   });
 
-  fs.writeFileSync('./.github/actions/folders.json', JSON.stringify(folders));
+  console.log(folders.join('\n'));
+  process.exit(0);
 });
