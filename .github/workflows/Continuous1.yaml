@@ -9,7 +9,7 @@ on:
       boolean:
         type: boolean
         description: True or False
-      choice:
+      folder-name::
         type: choice
         description: Make a choice
       choices: ${{ steps.list_folders.outputs.folders }}
