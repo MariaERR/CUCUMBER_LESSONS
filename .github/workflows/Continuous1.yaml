@@ -46,8 +46,8 @@ jobs:
           $env:FEATURE_FILES_STRING = ($env:FEATURE_FILES -join ',')
 
           # Run the tests only if there are feature files in the selected folder
-          bash -c 'if [ -n "$env:FEATURE_FILES_STRING" ]; then
-            npm run test $env:FEATURE_FILES_STRING
-          else
+          cmd /c 'if not "%FEATURE_FILES_STRING%"=="" (
+            npm run test %FEATURE_FILES_STRING%
+          ) else (
             echo "No feature files found in the selected folder."
-          fi'
+          )'
