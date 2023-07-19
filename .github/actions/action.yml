@@ -1,1 +1,11 @@
+name: 'List and Select Folders'
+description: 'List folders under tas-apis and allow selecting multiple folders'
 
+inputs:
+  folder-names:
+    description: 'Comma-separated list of folder names'
+    required: true
+
+outputs:
+  selected_folders:
+    description: 'Selected folders in JSON format'
