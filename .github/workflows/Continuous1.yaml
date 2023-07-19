@@ -7,9 +7,9 @@ on:
         type: environment
         description: Select the environment
       folder-name:
-          type: choice
-          description: 'Select the folder to execute tests'
-          options:
+        type: choice
+        description: 'Select the folder to execute tests'
+        options:
           - sgnum
           - Test2
       nonreg:
@@ -18,7 +18,6 @@ on:
       all-tests:
         type: boolean
         description: All Tests
-
 
 jobs:
   build:
@@ -53,23 +52,8 @@ jobs:
           }
           echo "FEATURE_PATH: $env:FEATURE_PATH"
 
-          $featureFiles = @()
-          foreach ($file in (Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse)) {
-            if (${{ github.event.inputs.nonreg }} == 'true') {
-              $tags = Get-Content $file.FullName | Select-String -Pattern "@Nonreg"
-              if ($tags -ne $null) {
-                $featureFiles += $file.FullName
-              }
-            } else {
-              $featureFiles += $file.FullName
-            }
-          }
-          $env:FEATURE_FILES_STRING = $featureFiles -join ','
-          echo "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
-
-          # Run the tests only if there are feature files in the selected folder
-          if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
-            npm run test $env:FEATURE_FILES_STRING
+          if (${{ github.event.inputs.nonreg }} == 'true') {
+            npm run test "./src/Features/tas-apis/${{ github.event.inputs.folder-name }}/features/**/*.feature --tags @Nonreg"
           } else {
-            echo "No feature files found in the selected folder."
+            npm run test "./src/Features/tas-apis/${{ github.event.inputs.folder-name }}/features/**/*.feature"
           }
