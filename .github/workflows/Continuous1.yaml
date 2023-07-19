@@ -1,13 +1,18 @@
-name: Run-tests-workflow
+name: CI
 
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        type: environment
+        description: Select the environment
+      boolean:
+        type: boolean
+        description: True or False
       folder-name:
+        type: choice
         description: 'Select the folder to execute tests'
-        required: true
-        type: choice  # Set the input type to 'choice'
-
+    
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,21 +26,22 @@ jobs:
         with:
           node-version: 14
 
-      - name: Generate Folder List
+      - name: List Folders
         id: list_folders
-        run: node ./.github/actions/list-folders.js
+        run: |
+          cd ./src/Features/tas-apis
+          FOLDERS=$(ls -d */ | sed 's#/##')
+          echo "Folder list: $FOLDERS"
+          echo "::set-output name=folders::$FOLDERS"
 
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          FOLDERS=$(cat ./.github/actions/folders.json)
+          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }} | tr '\n' ',' | sed 's/,$//')
           echo "Folder list: $FOLDERS"
-          echo "::set-output name=folders::$FOLDERS"
 
-      - name: Run Tests
-        run: |
-          # Your test execution commands here, using ${{ fromJson(steps.folder_selection.outputs.folders) }}
-          echo "Selected folder: ${{ github.event.inputs.folder-name }}"
-          cd ./src/Features/tas-apis/${{ github.event.inputs.folder-name }}
-          npm install
-          npm run test
+      - name: greet
+        run: | 
+          echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
+          echo "boolean is ${{ github.event.inputs.boolean }}" / ${{ inputs.boolean }} 
+          echo "choice is ${{ github.event.inputs.folder-name }}" / ${{ inputs.choice }}
