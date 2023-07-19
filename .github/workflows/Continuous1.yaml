@@ -25,12 +25,13 @@ jobs:
         with:
           node-version: 14
 
-      - name: Show Folder Selection
-        id: folder_selection
-        run: echo "::set-output name=selected_folder::${{ github.event.inputs.folder-name }}"
-
       - name: Run Tests
         run: |
-          cd ./src/Features/tas-apis/$(${{ fromJson(steps.folder_selection.outputs.selected_folder) }})
+          # Create a bash script to set the selected_folder output
+          echo "echo '::set-output name=selected_folder::\${{ github.event.inputs.folder-name }}'" > set_selected_folder.sh
+          bash set_selected_folder.sh
+          rm set_selected_folder.sh  # Clean up the temporary script
+
+          cd ./src  # Move to the src directory
           npm install
-          npm run test
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
