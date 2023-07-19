@@ -13,10 +13,8 @@ on:
         type: choice
         description: 'Select the folder to execute tests'
         options:
-          - ""
-        runs:
-          using: 'node12'
-          main: './.github/actions/list-folders/index.js'
+          - run: node ./.github/actions/list-folders.js
+        shell: bash
 
 jobs:
   build:
@@ -25,8 +23,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-        with:
-          repository: your/repo
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -35,13 +31,13 @@ jobs:
 
       - name: List Folders
         id: list_folders
-        run: ./.github/actions/list-folders
+        run: node ./.github/actions/list-folders.js
 
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          FOLDERS=$(echo "${{ steps.list_folders.outputs.folders }}")
-          echo "::set-output name=selected_folder::$FOLDERS"
+          FOLDERS=$(echo "${{ steps.list_folders.outputs.stdout }}" | tr '\n' ',')
+          echo "::set-output name=folders::$FOLDERS"
 
       - name: greet
         run: | 
