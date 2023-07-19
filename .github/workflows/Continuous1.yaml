@@ -6,8 +6,7 @@ on:
       folder-name:
         description: 'Select the folder to execute tests'
         required: true
-        type: string
-        default: 'sgnum' # Set a default value to display the dropdown-like behavior
+        type: choice
         options:
           - sgnum
           - sgnum2
