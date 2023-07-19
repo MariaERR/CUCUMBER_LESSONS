@@ -1,5 +1,5 @@
 Feature: Hear shout
- @Non reg
+ @Nonreg
  Scenario: Listener in within range
 		Given Lucy is located 15 metres from Sean
 		When Sean shout "free bagels at Sean's"
