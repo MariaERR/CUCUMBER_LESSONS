@@ -42,7 +42,7 @@ jobs:
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
           echo "FOLDER_NAME: $env:FOLDER_NAME"
-          $env:FEATURE_PATH="./Features/tas-apis/$FOLDER_NAME/features"
+          $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
           echo "FEATURE_PATH: $env:FEATURE_PATH"
           $env:FEATURE_FILES_STRING = (Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' } | Join-String ',')
           echo "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
