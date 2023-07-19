@@ -16,7 +16,7 @@ on:
           - ""
         runs:
           using: 'node12'
-          main: './.github/actions/list-folders/dist/index.js'
+          main: './.github/actions/list-folders/index.js'
 
 jobs:
   build:
