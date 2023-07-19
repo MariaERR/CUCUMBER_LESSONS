@@ -7,7 +7,10 @@ on:
         description: 'Select the folder(s) to execute tests'
         required: true
         type: string
-
+        options:
+          - sgnum
+          - sgnum2
+          - sgnum3
 jobs:
   build:
     runs-on: windows-latest
