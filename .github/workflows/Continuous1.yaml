@@ -40,7 +40,17 @@ jobs:
         run: |
           cd ./src
           npm install
-          npm run test
+          FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          FEATURE_PATH="./Features/tas-apis/$FOLDER_NAME/features"
+          FEATURE_FILES=$(find $FEATURE_PATH -type f -name "*.feature" -printf '%p,')
+          FEATURE_FILES=${FEATURE_FILES%?}  # Remove the trailing comma
+
+          # Run the tests only if there are feature files in the selected folder
+          if [ -n "$FEATURE_FILES" ]; then
+            npm run test $FEATURE_FILES
+          else
+            echo "No feature files found in the selected folder."
+          fi
   
           
           
