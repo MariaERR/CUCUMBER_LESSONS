@@ -31,6 +31,6 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd ./src/Features/tas-apis/${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
+          cd ./src/Features/tas-apis/$(${{ fromJson(steps.folder_selection.outputs.selected_folder) }})
           npm install
           npm run test
