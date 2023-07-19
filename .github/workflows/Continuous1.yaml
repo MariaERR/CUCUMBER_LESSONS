@@ -45,3 +45,10 @@ jobs:
           echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
           echo "boolean is ${{ github.event.inputs.boolean }}" / ${{ inputs.boolean }} 
           echo "choice is ${{ github.event.inputs.folder-name }}" / ${{ inputs.folder-name }}
+          
+          
+      - name: Run Tests
+        run: |
+          cd ./src/Features/tas-apis/${{ github.event.inputs.folder-name }}
+          npm install
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
