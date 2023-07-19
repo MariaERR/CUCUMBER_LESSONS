@@ -18,7 +18,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: List Folders
+        id: list_folders
+        run: node ./.github/actions/list-folders.js
+
+      - name: Show Folder Selection
+        id: folder_selection
+        run: |
+          echo "Folder list: $(cat ./.github/actions/folders.json)"
+          echo 
 
       - name: greet
         run: | 
