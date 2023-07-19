@@ -4,13 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       folder-name:
-        description: 'Select the folder(s) to execute tests'
+        description: 'Select the folder to execute tests'
         required: true
         type: string
+        default: 'sgnum' # Set a default value to display the dropdown-like behavior
         options:
           - sgnum
           - sgnum2
           - sgnum3
+
 jobs:
   build:
     runs-on: windows-latest
@@ -24,23 +26,8 @@ jobs:
         with:
           node-version: 14
 
-      - name: List Folders
-        id: list_folders
-        run: node ./.github/actions/list-folders.js
-
-      - name: Show Folder Selection
-        id: folder_selection
-        run: |
-          echo "Folder list: $(cat ./.github/actions/folders.json)"
-          echo "::set-output name=selected_folder::$(cat ./.github/actions/folders.json)"
-
-      - name: Display Folder Selection
-        run: |
-          echo "Selected folder(s): ${{ github.event.inputs.folder-name }}"
-          echo "::set-output name=selected_folder::${{ github.event.inputs.folder-name }}"
-
       - name: Run Tests
         run: |
-          cd ./src
+          cd ./src/Features/tas-apis/${{ github.event.inputs.folder-name }}
           npm install
-          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
+          npm run test
