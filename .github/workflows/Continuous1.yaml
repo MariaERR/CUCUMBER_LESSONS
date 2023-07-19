@@ -32,7 +32,7 @@ jobs:
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
               echo "FOLDER_NAME: $env:FOLDER_NAME"
-              $env:FEATURE_PATH="./src/Features/tas-apis/$env:FOLDER_NAME/features"
+              $env:FEATURE_PATH="${{ github.workspace }}/src/Features/tas-apis/$env:FOLDER_NAME/features"
               echo "FEATURE_PATH: $env:FEATURE_PATH"
 
               $featureFiles = @()
@@ -55,10 +55,3 @@ jobs:
               } else {
                 echo "No feature files found in the selected folder."
               }
-          By removing the "cd ./src" line, we avoid changing directories and use the full path when executing npm commands. This should resolve the error you encountered. Please give it a try, and let me know if it works as expected.
-
-
-
-
-
-
