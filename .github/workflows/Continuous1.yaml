@@ -10,11 +10,11 @@ on:
         type: boolean
         description: True or False
       folder-name:
-        type: select
+        type: choice
         description: 'Select the folder to execute tests'
         options:
           - ""
-         runs:
+        runs:
           using: 'node12'
           main: './.github/actions/list-folders/dist/index.js'
 
