@@ -10,11 +10,11 @@ on:
         type: boolean
         description: True or False
       folder-name:
-        type: choice
+        type: multi-choice
         description: 'Select the folder to execute tests'
         options:
-          - run: node ./.github/actions/list-folders.js
-        shell: bash
+          - sgnum
+          - Test2
 
 jobs:
   build:
