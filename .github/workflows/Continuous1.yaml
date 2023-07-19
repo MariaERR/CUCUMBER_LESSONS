@@ -29,7 +29,16 @@ jobs:
         with:
           node-version: 14
 
+      - name: List Folders
+        id: list_folders
+        run: node ./.github/actions/list-folders.js
 
+      - name: Show Folder Selection
+        id: folder_selection
+        run: |
+          FOLDERS=$(echo "${{ steps.list_folders.outputs.stdout }}" | tr '\n' ',')
+          echo "::set-output name=folders::$FOLDERS"
+          
       - name: greet
         run: | 
           echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
