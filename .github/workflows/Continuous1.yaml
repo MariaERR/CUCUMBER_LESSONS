@@ -37,11 +37,11 @@ jobs:
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }} | tr '\n' ',' | sed 's/,$//')
+         FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }} | sed 's/ /_/g')
           echo "Folder list: $FOLDERS"
 
       - name: greet
         run: | 
           echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
           echo "boolean is ${{ github.event.inputs.boolean }}" / ${{ inputs.boolean }} 
-          echo "choice is $FOLDERS
+          echo "choice is ${{ steps.list_folders.outputs.folders }} / ${{ inputs.choice }}
