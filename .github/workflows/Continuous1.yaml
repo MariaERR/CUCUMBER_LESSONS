@@ -44,7 +44,6 @@ jobs:
           cd ./src/Features/tas-apis/${{ github.event.inputs.folder-name }}
           npm install
           npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
-          echo "Selected Folder: ${{ steps.folder_selection.outputs.selected_folder }}"
 
       - name: greet
         run: | 
