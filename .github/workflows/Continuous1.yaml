@@ -9,11 +9,10 @@ on:
       boolean:
         type: boolean
         description: True or False
-      folder-name::
+      folder-name:
         type: choice
-        description: Make a choice
-      choices: ${{ steps.list_folders.outputs.folders }}
-
+        description: 'Select the folder to execute tests'
+        choices: ${{ steps.list_folders.outputs.folders }}
 
 jobs:
   build:
@@ -47,4 +46,4 @@ jobs:
         run: | 
           echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
           echo "boolean is ${{ github.event.inputs.boolean }}" / ${{ inputs.boolean }} 
-          
+          echo "choice is ${{ github.event.inputs.folder-name }}" / ${{ inputs.choice }}
