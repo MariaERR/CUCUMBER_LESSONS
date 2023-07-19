@@ -27,6 +27,6 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd src/${{ github.event.inputs.folder-name }}
-          npm install
-          npm run test
+         cd ./src/Features/tas-apis/${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
+         npm install
+         npm run test
