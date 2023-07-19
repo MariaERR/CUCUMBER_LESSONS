@@ -1,6 +1,11 @@
 name: 'List Folders'
-description: 'List folders under tas-apis'
-
+description: 'List all folders under ./src/Features/tas-apis'
+author: 'Your Name'
+inputs: {}
+outputs:
+  folders:
+    description: 'List of folders'
+    required: true
 runs:
   using: 'node12'
-  main: 'index.js'
+  main: 'dist/index.js'
