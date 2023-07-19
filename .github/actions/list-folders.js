@@ -1,9 +1,19 @@
+const core = require('@actions/core');
 const fs = require('fs');
 
-const folderList = './src/Features/tas-apis';
+async function run() {
+  try {
+    const folderListPath = core.getInput('folder-list');
+    const folders = fs.readdirSync(folderListPath, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
 
-const folders = fs.readdirSync(folderList, { withFileTypes: true })
-  .filter((dirent) => dirent.isDirectory())
-  .map((dirent) => dirent.name);
+    core.debug(`Available Folders: ${folders}`);
 
-console.log(JSON.stringify(folders));
+    core.setOutput('folders', JSON.stringify(folders));
+  } catch (error) {
+    core.setFailed(error.message);
+  }
+}
+
+run();
