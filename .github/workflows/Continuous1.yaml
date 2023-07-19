@@ -4,8 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       folder-name:
-        description: 'Select the folder(s) to execute tests'
+        description: 'Select the folder to execute tests'
         required: true
+        type: string  # Set the input type to 'string'
 
 jobs:
   build:
@@ -15,18 +16,26 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: List Folders
+      - name: Get Available Folders
         id: list_folders
         uses: ./.github/actions/list-folders
         with:
-          folder-name: ${{ github.event.inputs.folder-name }}
+          folder-list: './src/Features/tas-apis'
 
-      - name: Show Folder Selection
+      - name: Create Dropdown List
+        id: dropdown_list
         run: |
-          echo "Selected folder(s): ${{ fromJson(steps.list_folders.outputs.folders) }}"
+          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
+          FOLDER_LIST=(${FOLDERS// / })
+          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::{\"options\": [\"${FOLDER_LIST[@]}\"]}")
+
+      - name: Display Folder Selection
+        run: |
+          echo "Selected folder: ${{ github.event.inputs.folder-name }}"
+          echo "::set-output name=selected_folder::${{ github.event.inputs.folder-name }}"
 
       - name: Run Tests
         run: |
           cd ./src
           npm install
-          npm run test ${{ fromJson(steps.list_folders.outputs.folders) }}
+          npm run test ${{ fromJson(steps.dropdown_list.outputs.selected_folder) }}
