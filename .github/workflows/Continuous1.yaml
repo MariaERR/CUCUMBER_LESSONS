@@ -10,7 +10,7 @@ on:
         type: boolean
         description: True or False
       folder-name:
-        type: choice
+        type: select
         description: 'Select the folder to execute tests'
         options:
           - ""
