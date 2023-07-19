@@ -38,7 +38,6 @@ jobs:
         run: |
           FOLDERS=$(echo "${{ steps.list_folders.outputs.stdout }}" | tr '\n' ',')
           echo "::set-output name=folders::$FOLDERS"
-          echo "::set-output name=folders::$FOLDERS"
 
       - name: Run Tests
         run: |
