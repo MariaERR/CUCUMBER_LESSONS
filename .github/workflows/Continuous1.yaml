@@ -3,11 +3,14 @@ name: Run-tests-workflow
 on:
   workflow_dispatch:
     inputs:
-      folder-names:
-        description: 'Select the folders to execute tests'
+      folder-name:
+        description: 'Select the folder to execute tests'
         required: true
-        type: string
-        default: 'sgnum' # Default value to avoid error when no folder is selected
+        type: choice
+        options:
+          - sgnum
+          - sgnum2
+          - sgnum3
 
 jobs:
   build:
@@ -24,12 +27,6 @@ jobs:
 
       - name: Run Tests
         run: |
-          # Convert the comma-separated list of folders to an array
-          IFS=',' read -ra FOLDERS <<< "${{ github.event.inputs.folder-names }}"
-
-          # Loop through the selected folders and execute tests
-          for folder in "${FOLDERS[@]}"; do
-            cd "./src/Features/tas-apis/${folder}"
-            npm install
-            npm run test
-          done
+          cd ./src/Features/tas-apis/${{ github.event.inputs.folder-name }}
+          npm install
+          npm run test

@@ -1,11 +1,12 @@
-name: 'List and Select Folders'
-description: 'List folders under tas-apis and allow selecting multiple folders'
+name: 'List Folders'
+description: 'List folders under tas-apis'
 
 inputs:
-  folder-names:
-    description: 'Comma-separated list of folder names'
+  folder-list:
+    description: 'Path to the folder containing the folders to be listed'
     required: true
+    default: './src/Features/tas-apis'
 
-outputs:
-  selected_folders:
-    description: 'Selected folders in JSON format'
+runs:
+  using: 'node12'
+  main: 'list-folders.js'
