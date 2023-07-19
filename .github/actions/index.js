@@ -1,4 +1,3 @@
-
 const core = require('@actions/core');
 
 const folderNames = core.getInput('folder-names');
