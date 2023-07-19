@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       folder-name:
-        description: 'Select the folder to execute tests'
+        description: 'Select the folder(s) to execute tests'
         required: true
-        type: string  # Set the input type to 'string'
+        type: string
 
 jobs:
   build:
@@ -16,26 +16,28 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Get Available Folders
-        id: list_folders
-        uses: ./.github/actions/list-folders
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          folder-list: './src/Features/tas-apis'
+          node-version: 14
 
-      - name: Create Dropdown List
-        id: dropdown_list
+      - name: List Folders
+        id: list_folders
+        run: node ./.github/actions/list-folders.js
+
+      - name: Show Folder Selection
+        id: folder_selection
         run: |
-          FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }})
-          FOLDER_LIST=(${FOLDERS// / })
-          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::{\"options\": [\"${FOLDER_LIST[@]}\"]}")
+          echo "Folder list: $(cat ./.github/actions/folders.json)"
+          echo "::set-output name=selected_folder::$(cat ./.github/actions/folders.json)"
 
       - name: Display Folder Selection
         run: |
-          echo "Selected folder: ${{ github.event.inputs.folder-name }}"
+          echo "Selected folder(s): ${{ github.event.inputs.folder-name }}"
           echo "::set-output name=selected_folder::${{ github.event.inputs.folder-name }}"
 
       - name: Run Tests
         run: |
           cd ./src
           npm install
-          npm run test ${{ fromJson(steps.dropdown_list.outputs.selected_folder) }}
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
