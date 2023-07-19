@@ -44,4 +44,4 @@ jobs:
         run: | 
           echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
           echo "boolean is ${{ github.event.inputs.boolean }}" / ${{ inputs.boolean }} 
-          echo "choice is ${{ steps.list_folders.outputs.folders }} / ${{ inputs.choice }}
+          echo "choice is ::set-output name=folders::$FOLDERS / ${{ inputs.choice }}
