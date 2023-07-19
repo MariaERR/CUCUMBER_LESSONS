@@ -1,32 +1,31 @@
-name: Run-tests-workflow
+name: CI
 
 on:
   workflow_dispatch:
     inputs:
-      folder-name:
-        description: 'Select the folder to execute tests'
-        required: true
+      environment:
+        type: environment
+        description: Select the environment
+      boolean:
+        type: boolean
+        description: True or False
+      choice:
         type: choice
+        description: Make a choice
         options:
-          - sgnum
-          - Test2
-      
-
+        - foo
+        - bar
+        - baz
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-
-      - name: Run Tests
-        run: |
-          cd ./src/Features/tas-apis/${{ github.event.inputs.folder-name }}
-          npm install
-          npm run test
+      - name: greet
+        run: | 
+          echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
+          echo "boolean is ${{ github.event.inputs.boolean }}" / ${{ inputs.boolean }} 
+          echo "choice is ${{ github.event.inputs.choice }}" / ${{ inputs.choice }}
+          
