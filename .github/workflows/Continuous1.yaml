@@ -6,11 +6,14 @@ on:
       environment:
         type: environment
         description: Select the environment
-      boolean:
+      nonreg:
         type: boolean
-        description: True or False
+        description: Nonreg
+      all-tests:
+        type: boolean
+        description: All Tests
       folder-name:
-        type: choice
+        type: multichoice
         description: 'Select the folder to execute tests'
         options:
           - sgnum
