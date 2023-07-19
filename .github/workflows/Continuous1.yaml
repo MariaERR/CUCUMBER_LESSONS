@@ -38,9 +38,9 @@ jobs:
           
       - name: Run Tests
         run: |
-          cd ./src/Features/tas-apis/${{ github.event.inputs.folder-name }}
+          cd ./src
           npm install
-          npm run test ./src/Features/tas-apis/${{ github.event.inputs.folder-name }}
+          npm run test
   
           
           
