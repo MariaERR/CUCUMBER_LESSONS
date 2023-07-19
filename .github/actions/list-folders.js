@@ -12,12 +12,5 @@ fs.readdir(tasApisDir, (err, files) => {
     return fs.statSync(`${tasApisDir}/${file}`).isDirectory();
   });
 
-  fs.writeFile('./.github/actions/folders.json', JSON.stringify(folders), (err) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-    console.log(`Folders: ${folders}`);
-    process.exit(0);
-  });
+  fs.writeFileSync('./.github/actions/folders.json', JSON.stringify(folders));
 });
