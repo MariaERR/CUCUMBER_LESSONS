@@ -41,10 +41,10 @@ jobs:
           cd ./src
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          echo "FOLDER_NAME: $env:FOLDER_NAME"
           $env:FEATURE_PATH="./Features/tas-apis/$FOLDER_NAME/features"
+          echo "FEATURE_PATH: $env:FEATURE_PATH"
           $env:FEATURE_FILES_STRING = (Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' } | Join-String ',')
-
-          # Debugging: Display the FEATURE_FILES_STRING to verify the list of files
           echo "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
 
           # Run the tests only if there are feature files in the selected folder
