@@ -46,12 +46,8 @@ jobs:
           FEATURE_FILES=${FEATURE_FILES%?}  # Remove the trailing comma
 
           # Run the tests only if there are feature files in the selected folder
-          if [ -n "$FEATURE_FILES" ]; then
+          bash -c 'if [ -n "$FEATURE_FILES" ]; then
             npm run test $FEATURE_FILES
           else
             echo "No feature files found in the selected folder."
-          fi
-  
-          
-          
-          
+          fi'
