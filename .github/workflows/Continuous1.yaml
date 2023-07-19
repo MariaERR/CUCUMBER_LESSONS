@@ -46,6 +46,8 @@ jobs:
           echo "FEATURE_PATH: $env:FEATURE_PATH"
           $env:FEATURE_FILES_STRING = (Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' } | Join-String ',')
           echo "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
+           echo "FEATURE_FILES:"
+          Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
 
           # Run the tests only if there are feature files in the selected folder
           if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
