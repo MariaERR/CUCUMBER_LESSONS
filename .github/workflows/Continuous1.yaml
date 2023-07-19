@@ -29,12 +29,12 @@ jobs:
         id: list_folders
         run: |
           cd ./src/Features/tas-apis
-          FOR /D %%i IN (*) DO @ECHO %%~nxi > folders.txt
+          Get-ChildItem -Directory | ForEach-Object { $_.Name } > folders.txt
 
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          FOLDERS=$(<./src/Features/tas-apis/folders.txt)
+          FOLDERS=$(Get-Content ./src/Features/tas-apis/folders.txt | Out-String)
           SELECTED_FOLDER=$(echo "::set-output name=selected_folder::$FOLDERS")
 
       - name: Display Folder Selection
@@ -45,3 +45,5 @@ jobs:
       - name: Run Tests
         run: |
           cd ./src
+          npm install
+          npm run test ${{ fromJson(steps.folder_selection.outputs.selected_folder) }}
