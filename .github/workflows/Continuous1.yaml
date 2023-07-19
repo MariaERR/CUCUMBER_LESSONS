@@ -29,7 +29,9 @@ jobs:
         id: list_folders
         run: |
           cd ./src/Features/tas-apis
-          Get-ChildItem -Directory | ForEach-Object { $_.Name } > folders.txt
+          $folders = Get-ChildItem -Directory | ForEach-Object { $_.Name }
+          Write-Host "Folder list: $folders"
+          echo "::set-output name=folders::$folders" | Out-File -Encoding utf8 folders.txt
 
       - name: Show Folder Selection
         id: folder_selection
