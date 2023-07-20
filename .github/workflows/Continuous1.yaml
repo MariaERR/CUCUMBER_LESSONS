@@ -7,9 +7,9 @@ on:
         type: environment
         description: Select the environment
       folder-name:
-        type: choice
-        description: 'Select the folder to execute tests'
-        options:
+          type: choice
+          description: 'Select the folder to execute tests'
+          options:
           - sgnum
           - Test2
       nonreg:
@@ -32,9 +32,15 @@ jobs:
         with:
           node-version: 14
 
+      - name: greet
+        run: | 
+          echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
+          echo "boolean is ${{ github.event.inputs.boolean }}" / ${{ inputs.boolean }} 
+          echo "choice is ${{ github.event.inputs.folder-name }}" / ${{ inputs.folder-name }}
+          
       - name: Run Tests
-        working-directory: ./src
         run: |
+          cd ./src
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
           $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
