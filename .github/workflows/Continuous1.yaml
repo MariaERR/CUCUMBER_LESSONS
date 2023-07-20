@@ -30,22 +30,21 @@ jobs:
         run: |
           cd ./src
           npm install
-          $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
-          $env:FEATURE_PATH="../src/Features/tas-apis/$env:FOLDER_NAME/features"
-          $featureFiles = @()
-          if (${{ github.event.inputs.all-tests }} -eq 'true') {
-            Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $featureFiles += $_.FullName }
-          } elseif (${{ github.event.inputs.nonreg }} -eq 'true') {
-            $featureFiles += (Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName } | Select-String -Pattern '@Nonreg').Matches | ForEach-Object { $_.Groups[0].Value }
-          } else {
-            Write-Host "Please select either Nonreg or All Tests checkbox."
+          FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          FEATURE_PATH="./Features/tas-apis/$FOLDER_NAME/features"
+          FEATURE_FILES=()
+          if ${{ github.event.inputs.all-tests }} == true; then
+            FEATURE_FILES=($(find $FEATURE_PATH -name "*.feature" -type f))
+          elif ${{ github.event.inputs.nonreg }} == true; then
+            FEATURE_FILES=($(grep -rl "@Nonreg" $FEATURE_PATH | tr '\n' ' '))
+          else
+            echo "Please select either Nonreg or All Tests checkbox."
             exit 1
-          }
-          $env:FEATURE_FILES_STRING = $featureFiles -join ','
-          Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
+          fi
+          FEATURE_FILES_STRING=$(IFS=,; echo "${FEATURE_FILES[*]}")
 
-          if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
-            npm run test $env:FEATURE_FILES_STRING
-          } else {
-            Write-Host "No feature files found in the selected folder."
-          }
+          if [ -n "$FEATURE_FILES_STRING" ]; then
+            npm run test $FEATURE_FILES_STRING
+          else
+            echo "No feature files found in the selected folder."
+          fi
