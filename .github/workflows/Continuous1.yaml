@@ -54,7 +54,7 @@ jobs:
 
           # Search for feature files based on checkbox selection
           echo "i am before boucle if of nonreg"
-          if (${{ github.event.inputs.nonreg }} == 'true') {
+          if (${{ github.event.inputs.nonreg }}) {
             echo "i am inside boucle if of nonreg"
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
               $content = Get-Content $_
