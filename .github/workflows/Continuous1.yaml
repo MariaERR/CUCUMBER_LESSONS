@@ -53,7 +53,7 @@ jobs:
             echo "Please select either Nonreg or All Tests checkbox."
             exit 1
           }
-  
+          
           if (-not [string]::IsNullOrEmpty($featureFiles)) {
             npm run test $featureFiles
           } else {
