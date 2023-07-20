@@ -12,12 +12,12 @@ on:
         options:
           - sgnum
           - Test2
-      nonreg:
-        type: boolean
-        description: Nonreg
-      all-tests:
-        type: boolean
-        description: All Tests
+      test-type:
+        type: string
+        description: 'Select the type of test'
+        options:
+          - All Tests
+          - Nonreg
 
 jobs:
   build:
@@ -35,9 +35,8 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "nonreg is ${{ github.event.inputs.nonreg }}"
-          Write-Host "all-tests is ${{ github.event.inputs.all-tests }}"
           Write-Host "folder-name is ${{ github.event.inputs.folder-name }}"
+          Write-Host "test-type is ${{ github.event.inputs.test-type }}"
           
       - name: Run Tests
         working-directory: ./src
@@ -52,31 +51,30 @@ jobs:
           $featureFiles = @()
           Write-Host "featureFile : $featureFile"
 
-          # Search for feature files based on checkbox selection
-          Write-Host "i am before boucle if of nonreg"
-          if ($env:nonreg -eq 'true') {
-            Write-Host "i am inside boucle if of nonreg"
+          # Search for feature files based on test type selection
+          if (${{ github.event.inputs.test-type }} == 'All Tests') {
+            Write-Host "Running All Test Feature Files"
+            $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
+          } 
+          elseif (${{ github.event.inputs.test-type }} == 'Nonreg') {
+            Write-Host "Running Nonreg Feature Files"
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
               $content = Get-Content $_
               if ($content -match '@Nonreg') { $_.FullName -replace '\\', '/' }
             }
-            Write-Host "Nonreg Feature Files:"
-            $featureFiles
-            Write-Host "nonreg is 'true'"
-
+          } else {
+            Write-Host "Please select a valid test type."
+            exit 1
+          }
+          
+          # Check if feature files were found and run the tests
+          if ($featureFiles.Count -gt 0) {
             # Convert the array to a comma-separated string
             $env:FEATURE_FILES_STRING = $featureFiles -join ','
             Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
-
-            # Check if feature files were found and run the tests
-            if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
-              npm run test $env:FEATURE_FILES_STRING
-            } else {
-              Write-Host "No feature files found in the selected folder."
-            }
+            npm run test $env:FEATURE_FILES_STRING
           } else {
-            Write-Host "Please select either Nonreg or All Tests checkbox."
-            exit 1
+            Write-Host "No feature files found for the selected test type."
           }
-
+          
           Write-Host "Process completed."
