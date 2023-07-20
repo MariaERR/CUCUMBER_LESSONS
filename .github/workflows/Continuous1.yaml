@@ -40,7 +40,7 @@ jobs:
           echo "folder-name is ${{ github.event.inputs.folder-name }}"
           
       - name: Run Tests
-        working-directory: ./src  # Set the working directory to ./src
+        working-directory: ./src
         run: |
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
@@ -52,11 +52,11 @@ jobs:
           $featureFiles = @()
           
           # Search for feature files based on checkbox selection
-          if (${{ github.event.inputs.all-tests }} == true) {
+          if (${{ github.event.inputs.all-tests }} == 'true') {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
             echo "All Test Feature Files: $featureFiles"
           } 
-          elseif (${{ github.event.inputs.nonreg }} == true) {
+          elseif (${{ github.event.inputs.nonreg }} == 'true') {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
               if (Get-Content $_ | Select-String -Pattern '@Nonreg') { $_.FullName -replace '\\', '/' }
             }
