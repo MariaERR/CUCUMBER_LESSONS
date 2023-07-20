@@ -7,13 +7,10 @@ on:
         type: environment
         description: Select the environment
       folder-name:
-        type: choice
-        description: 'Select the folder to execute tests'
-        options:
-          - sgnum
-          - Test2
-      test-type:
         type: string
+        description: 'Select the folder to execute tests (use comma for multi-select)'
+      test-type:
+        type: choice
         description: 'Select the type of test'
         options:
           - All Tests
