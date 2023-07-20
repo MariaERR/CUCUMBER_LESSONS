@@ -42,20 +42,20 @@ jobs:
       - name: Run Tests
         run: |
           # Change directory to ./src
-            cd ./src
+          cd ./src
 
-            # Check if package.json file exists before running npm install
-            $packageJsonPath = "./package.json"
-            if (Test-Path $packageJsonPath) {
-              npm install
-            } else {
-              echo "Error: package.json file not found."
-              exit 1
-            }
+          # Check if package.json file exists before running npm install
+          $packageJsonPath = "./package.json"
+          if (Test-Path $packageJsonPath) {
+            echo "package.json found. Running npm install..."
+            npm install
+          } else {
+            echo "Error: package.json file not found."
+            exit 1
+          }
 
-          $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          # Display FOLDER_NAME and FEATURE_PATH for debugging
           echo "FOLDER_NAME : $env:FOLDER_NAME"
-          $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
           echo "FEATURE_PATH : $env:FEATURE_PATH"
 
           # Create an empty array to store feature files
