@@ -49,9 +49,9 @@ jobs:
           $featureFiles = @()
 
           # Search for feature files based on checkbox selection
-          if (${{ github.event.inputs.all-tests }} == 'true') {
+          if (${{ github.event.inputs.all-tests }}) {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-          } elseif (${{ github.event.inputs.nonreg }} == 'true') {
+          } elseif (${{ github.event.inputs.nonreg }}) {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
               if (Get-Content $_ | Select-String -Pattern '@Nonreg') { $_.FullName -replace '\\', '/' }
             }
