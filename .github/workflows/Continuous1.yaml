@@ -32,7 +32,7 @@ jobs:
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
           echo "FOLDER_NAME: $env:FOLDER_NAME"
-          $env:FEATURE_PATH="${{ github.workspace }}/src/Features/tas-apis/$env:FOLDER_NAME/features"
+          $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
           echo "FEATURE_PATH: $env:FEATURE_PATH"
 
           # Debugging: Display the content of the $env:FEATURE_PATH directory to verify the file structure
