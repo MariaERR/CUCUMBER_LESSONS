@@ -36,12 +36,12 @@ jobs:
         working-directory: ./src
         run: |
           npm install
-          $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          $env:FOLDER_NAME="sgnum"
           $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
           $featureFiles = @()
-          if (${{ github.event.inputs.all-tests }} -eq "true") {
+          if ($false -eq $true) {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' } | Join-String ','
-          } elseif (${{ github.event.inputs.nonreg }} -eq "true") {
+          } elseif ($true -eq $true) {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' } | ForEach-Object { if (Get-Content $_ | Select-String -Pattern '@Nonreg') { $_ } } | Join-String ','
           } else {
             echo "Please select either Nonreg or All Tests checkbox."
@@ -53,3 +53,4 @@ jobs:
           } else {
             echo "No feature files found in the selected folder."
           }
+          shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
