@@ -83,3 +83,5 @@ jobs:
           } else {
             Write-Host "No feature files found in the selected folder."
           }
+          
+          Write-Host "Process completed."
