@@ -31,21 +31,20 @@ jobs:
           cd ./src
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
-              echo "FOLDER_NAME: $env:FOLDER_NAME"
-              $env:FEATURE_PATH="${{ github.workspace }}/src/Features/tas-apis/$env:FOLDER_NAME/features"
-              echo "FEATURE_PATH: $env:FEATURE_PATH"
+          echo "FOLDER_NAME: $env:FOLDER_NAME"
+          $env:FEATURE_PATH="${{ github.workspace }}/src/Features/tas-apis/$env:FOLDER_NAME/features"
+          echo "FEATURE_PATH: $env:FEATURE_PATH"
 
-              $featureFiles = @()
-              foreach ($file in (Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse)) {
-                $featureFiles += $file.FullName
-              }
+          # Debugging: Display the content of the $env:FEATURE_PATH directory to verify the file structure
+          ls $env:FEATURE_PATH
 
-              $env:FEATURE_FILES_STRING = $featureFiles -join ','
-              echo "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
+          $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName }
+          $env:FEATURE_FILES_STRING = $featureFiles -join ','
+          echo "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
 
-              # Run the tests only if there are feature files in the selected folder
-              if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
-                npm run test $env:FEATURE_FILES_STRING
-              } else {
-                echo "No feature files found in the selected folder."
-              }
+          # Run the tests only if there are feature files in the selected folder
+          if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
+            npm run test $env:FEATURE_FILES_STRING
+          } else {
+            echo "No feature files found in the selected folder."
+          }
