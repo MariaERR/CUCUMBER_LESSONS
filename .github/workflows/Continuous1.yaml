@@ -24,11 +24,24 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Previous steps remain unchanged
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: greet
+        run: | 
+          echo "environment is ${{ github.event.inputs.environment }}"
+          echo "nonreg is ${{ github.event.inputs.nonreg }}"
+          echo "all-tests is ${{ github.event.inputs.all-tests }}"
+          echo "folder-name is ${{ github.event.inputs.folder-name }}"
+          
       - name: Run Tests
+        working-directory: ./src  # Set the working directory to ./src
         run: |
-          cd ./src
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
           echo  "FOLDER_NAME : $env:FOLDER_NAME"
