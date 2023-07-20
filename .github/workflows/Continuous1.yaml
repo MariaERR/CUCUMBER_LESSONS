@@ -30,9 +30,9 @@ jobs:
         run: |
           cd ./src
           npm install
-           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
               echo "FOLDER_NAME: $env:FOLDER_NAME"
-              $env:FEATURE_PATH="./src/Features/tas-apis/$env:FOLDER_NAME/features"
+              $env:FEATURE_PATH="${{ github.workspace }}/src/Features/tas-apis/$env:FOLDER_NAME/features"
               echo "FEATURE_PATH: $env:FEATURE_PATH"
 
               $featureFiles = @()
