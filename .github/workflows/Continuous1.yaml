@@ -53,7 +53,7 @@ jobs:
             Write-Host "Running All Test Feature Files"
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
           } 
-          elseif (${{ github.event.inputs.test-type }} == 'Nonreg') {
+          elseif (${{ github.event.inputs.test-type }} == 'nonreg') {
             Write-Host "Running Nonreg Feature Files"
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
               $content = Get-Content $_
