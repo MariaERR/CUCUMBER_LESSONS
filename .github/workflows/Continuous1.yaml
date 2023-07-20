@@ -34,43 +34,49 @@ jobs:
 
       - name: greet
         run: | 
-          Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "nonreg is ${{ github.event.inputs.nonreg }}"
-          Write-Host "all-tests is ${{ github.event.inputs.all-tests }}"
-          Write-Host "folder-name is ${{ github.event.inputs.folder-name }}"
-          
+          Write-Host "environment is ${{ env.environment }}"
+          Write-Host "nonreg is ${{ env.nonreg }}"
+          Write-Host "all-tests is ${{ env.all-tests }}"
+          Write-Host "folder-name is ${{ env.folder-name }}"
+
       - name: Run Tests
         working-directory: ./src
         run: |
           npm install
-          $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          $env:FOLDER_NAME="${{ env.folder-name }}"
           Write-Host "FOLDER_NAME : $env:FOLDER_NAME"
           $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
           Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
-          
+
           # Create an empty array to store feature files
           $featureFiles = @()
           Write-Host "featureFile : $featureFile"
 
           # Search for feature files based on checkbox selection
           echo "i am before boucle if of nonreg"
-          if (${{ github.event.inputs.nonreg }}) {
-              Write-Host "i am inside boucle if of nonreg"
-              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
-                  $content = Get-Content $_
-                  if ($content -match '@Nonreg') { $_.FullName -replace '\\', '/' }
-              }
-              Write-Host "Nonreg Feature Files:" $featureFiles
-              Write-Host "nonreg is 'true'"
+          if (${{ env.nonreg }} == 'true') {
+            Write-Host "i am inside boucle if of nonreg"
+            $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
+              $content = Get-Content $_
+              if ($content -match '@Nonreg') { $_.FullName -replace '\\', '/' }
+            }
+            Write-Host "Nonreg Feature Files:"
+            $featureFiles
+            Write-Host "nonreg is 'true'"
 
-              # Convert the array to a comma-separated string
-              $env:FEATURE_FILES_STRING = $featureFiles -join ','
-              Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
+            # Convert the array to a comma-separated string
+            $env:FEATURE_FILES_STRING = $featureFiles -join ','
+            Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
 
-              # Check if feature files were found and run the tests
-              if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
-                  npm run test $env:FEATURE_FILES_STRING
-              } else {
-                  Write-Host "No feature files found in the selected folder."
-              }
+            # Check if feature files were found and run the tests
+            if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
+              npm run test $env:FEATURE_FILES_STRING
+            } else {
+              Write-Host "No feature files found in the selected folder."
+            }
+          } else {
+            Write-Host "Please select either Nonreg or All Tests checkbox."
+            exit 1
           }
+
+          Write-Host "Process completed."
