@@ -50,12 +50,14 @@ jobs:
           
           # Create an empty array to store feature files
           $featureFiles = @()
-          
+          Write-Host "featureFile : $featureFile"
+
           # Search for feature files based on checkbox selection
           if (${{ github.event.inputs.all-tests }} == 'true') {
+           Write-Host "input.all-tests :  ${{ github.event.inputs.all-tests }}"
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-            Write-Host "All Test Feature Files:"
-            $featureFiles
+            Write-Host "All Test Feature Files is $featureFiles"
+           
             Write-Host "all-tests is 'true'"
           } 
           elseif (${{ github.event.inputs.nonreg }} == 'true') {
