@@ -31,7 +31,7 @@ jobs:
           cd ./src
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
-          $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
+          $env:FEATURE_PATH="../src/Features/tas-apis/$env:FOLDER_NAME/features"
           $featureFiles = @()
           if (${{ github.event.inputs.all-tests }} -eq 'true') {
             Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $featureFiles += $_.FullName }
