@@ -24,21 +24,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      # Previous steps remain unchanged
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-
-      - name: greet
-        run: | 
-          echo "environment is ${{ github.event.inputs.environment }}"
-          echo "folder-name is ${{ github.event.inputs.folder-name }}"
-          echo "nonreg is ${{ github.event.inputs.nonreg }}"
-          echo "all-tests is ${{ github.event.inputs.all-tests }}"
-          
       - name: Run Tests
         run: |
           cd ./src
@@ -52,11 +39,11 @@ jobs:
           $featureFiles = @()
           
           # Search for feature files based on checkbox selection
-          if (${{ github.event.inputs.all-tests }} == 'true') {
+          if (${{ github.event.inputs.all-tests }} == true) {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
             echo "All Test Feature Files: $featureFiles"
           } 
-          elseif (${{ github.event.inputs.nonreg }} == 'true') {
+          elseif (${{ github.event.inputs.nonreg }} == true) {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
               if (Get-Content $_ | Select-String -Pattern '@Nonreg') { $_.FullName -replace '\\', '/' }
             }
@@ -75,9 +62,3 @@ jobs:
           } else {
             echo "No feature files found in the selected folder."
           }
-
-
-
-
-
-
