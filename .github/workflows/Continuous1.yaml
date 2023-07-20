@@ -55,8 +55,17 @@ jobs:
           }
 
           # Display FOLDER_NAME and FEATURE_PATH for debugging
+          echo "FOLDER_NAME input: ${{ github.event.inputs.folder-name }}"
+          echo "FEATURE_PATH input: ${{ env:FEATURE_PATH }}"
+
+          # Set FOLDER_NAME and FEATURE_PATH variables
+          $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
+
+          # Display updated FOLDER_NAME and FEATURE_PATH for debugging
           echo "FOLDER_NAME : $env:FOLDER_NAME"
           echo "FEATURE_PATH : $env:FEATURE_PATH"
+
 
           # Create an empty array to store feature files
             $featureFiles = @()
