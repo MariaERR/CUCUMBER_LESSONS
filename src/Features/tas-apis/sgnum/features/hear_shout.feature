@@ -1,4 +1,4 @@
- @Nonreg
+ @nonreg
  Feature: Hear shout
  Scenario: Listener in within range
 		Given Lucy is located 15 metres from Sean
