@@ -41,14 +41,17 @@ jobs:
           
       - name: Run Tests
         run: |
-          # Check if package.json file exists before running npm install
-          $packageJsonPath = "./package.json"
-          if (Test-Path $packageJsonPath) {
-            npm install
-          } else {
-            echo "Error: package.json file not found."
-            exit 1
-          }
+          # Change directory to ./src
+            cd ./src
+
+            # Check if package.json file exists before running npm install
+            $packageJsonPath = "./package.json"
+            if (Test-Path $packageJsonPath) {
+              npm install
+            } else {
+              echo "Error: package.json file not found."
+              exit 1
+            }
 
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
           echo "FOLDER_NAME : $env:FOLDER_NAME"
