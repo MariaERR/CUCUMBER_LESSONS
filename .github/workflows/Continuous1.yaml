@@ -70,6 +70,10 @@ jobs:
             exit 1
           }
 
+          # Debug - Output the array of feature files
+          Write-Host "DEBUG - FEATURE_FILES_ARRAY:"
+          $featureFiles
+
           # Convert the array to a comma-separated string
           $env:FEATURE_FILES_STRING = $featureFiles -join ','
           echo "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
