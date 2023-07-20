@@ -7,9 +7,9 @@ on:
         type: environment
         description: Select the environment
       folder-name:
-          type: choice
-          description: 'Select the folder to execute tests'
-          options:
+        type: choice
+        description: 'Select the folder to execute tests'
+        options:
           - sgnum
           - Test2
       nonreg:
@@ -43,18 +43,23 @@ jobs:
           cd ./src
           npm install
           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          echo  "FOLDER_NAME : $env:FOLDER_NAME"
           $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
+          echo  "FEATURE_PATH : $env:FEATURE_PATH"
 
           # Create an empty array to store feature files
           $featureFiles = @()
 
           # Search for feature files based on checkbox selection
-          if (${{ github.event.inputs.all-tests }}) {
+          if (${{ github.event.inputs.all-tests }} == true) {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-          } elseif (${{ github.event.inputs.nonreg }}) {
+            echo "All Test Feature Files: $featureFiles"
+          } 
+          elseif (${{ github.event.inputs.nonreg }} == true) {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
               if (Get-Content $_ | Select-String -Pattern '@Nonreg') { $_.FullName -replace '\\', '/' }
             }
+            echo "Nonreg Feature Files: $featureFiles"
           } else {
             echo "Please select either Nonreg or All Tests checkbox."
             exit 1
