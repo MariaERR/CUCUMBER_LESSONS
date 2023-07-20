@@ -55,23 +55,24 @@ jobs:
           # Search for feature files based on checkbox selection
           echo "i am before boucle if of nonreg"
           if (${{ github.event.inputs.nonreg }} == 'true') {
-          echo "i am inside boucle if of nonreg"
-          $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
-          $content = Get-Content $_
-          if ($content -match '@Nonreg') { $_.FullName -replace '\\', '/' }
-          }
-          Write-Host "Nonreg Feature Files:" $featureFiles
-          Write-Host "nonreg is 'true'"
-          
-          # Convert the array to a comma-separated string
-          $env:FEATURE_FILES_STRING = $featureFiles -join ','
-          Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
-          
-          # Check if feature files were found and run the tests
-          if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
-            npm run test $env:FEATURE_FILES_STRING
-          } else {
-            Write-Host "No feature files found in the selected folder."
+            echo "i am inside boucle if of nonreg"
+            $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
+              $content = Get-Content $_
+              if ($content -match '@Nonreg') { $_.FullName -replace '\\', '/' }
+            }
+            Write-Host "Nonreg Feature Files:" $featureFiles
+            Write-Host "nonreg is 'true'"
+            
+            # Convert the array to a comma-separated string
+            $env:FEATURE_FILES_STRING = $featureFiles -join ','
+            Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
+            
+            # Check if feature files were found and run the tests
+            if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
+              npm run test $env:FEATURE_FILES_STRING
+            } else {
+              Write-Host "No feature files found in the selected folder."
+            }
           }
           
           Write-Host "Process completed."
