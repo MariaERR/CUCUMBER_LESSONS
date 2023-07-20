@@ -52,19 +52,19 @@ jobs:
           $featureFiles = @()
           
           # Search for feature files based on checkbox selection
-          if (${{ github.event.inputs.all-tests }} == true) {
+          if (${{ github.event.inputs.all-tests }} == 'true') {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
             Write-Host "All Test Feature Files:"
-            Write-Host $featureFiles
+            $featureFiles
             Write-Host "all-tests is 'true'"
           } 
-          elseif (${{ github.event.inputs.nonreg }} == true) {
+          elseif (${{ github.event.inputs.nonreg }} == 'true') {
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
               $content = Get-Content $_
-              if ($content | Select-String -Pattern '@Nonreg') { $_.FullName -replace '\\', '/' }
+              if ($content -match '@Nonreg') { $_.FullName -replace '\\', '/' }
             }
             Write-Host "Nonreg Feature Files:"
-            Write-Host $featureFiles
+            $featureFiles
             Write-Host "nonreg is 'true'"
           } else {
             Write-Host "Please select either Nonreg or All Tests checkbox."
