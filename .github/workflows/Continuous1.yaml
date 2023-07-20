@@ -30,28 +30,22 @@ jobs:
         run: |
           cd ./src
           npm install
-          $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+           $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
               echo "FOLDER_NAME: $env:FOLDER_NAME"
-              $env:FEATURE_PATH="${{ github.workspace }}/src/Features/tas-apis/$env:FOLDER_NAME/features"
+              $env:FEATURE_PATH="./src/Features/tas-apis/$env:FOLDER_NAME/features"
               echo "FEATURE_PATH: $env:FEATURE_PATH"
 
               $featureFiles = @()
               foreach ($file in (Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse)) {
                 $featureFiles += $file.FullName
               }
+
               $env:FEATURE_FILES_STRING = $featureFiles -join ','
               echo "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
 
               # Run the tests only if there are feature files in the selected folder
               if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
-                $cucumberOptions = ""
-                if (${{ github.event.inputs.nonreg }} -eq 'true') {
-                  $cucumberOptions += "--tags @Nonreg "
-                }
-                if (${{ github.event.inputs.all-tests }} -eq 'true') {
-                  $cucumberOptions += "--tags '' "
-                }
-                npm run test $env:FEATURE_FILES_STRING $cucumberOptions
+                npm run test $env:FEATURE_FILES_STRING
               } else {
                 echo "No feature files found in the selected folder."
               }
