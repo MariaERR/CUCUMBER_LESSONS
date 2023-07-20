@@ -53,28 +53,15 @@ jobs:
           Write-Host "featureFile : $featureFile"
 
           # Search for feature files based on checkbox selection
-          if (${{ github.event.inputs.all-tests }} == 'true') {
-          echo "i am inside boucle if of all-test"
-           Write-Host "input.all-tests :  ${{ github.event.inputs.all-tests }}"
-            $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-            Write-Host "All Test Feature Files is $featureFiles"
-           
-            Write-Host "all-tests is 'true'"
-          } 
-          elseif (${{ github.event.inputs.nonreg }} == 'true') {
-                    echo "i am inside boucle if of nonreg"
-            $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
-              $content = Get-Content $_
-              if ($content -match '@Nonreg') { $_.FullName -replace '\\', '/' }
-            }
-            Write-Host "Nonreg Feature Files:"
-            $featureFiles
-            Write-Host "nonreg is 'true'"
-          } else {
-                              echo "i am inside boucle else boucle"
-            Write-Host "Please select either Nonreg or All Tests checkbox."
-            exit 1
+          echo "i am before boucle if of nonreg"
+          if (${{ github.event.inputs.nonreg }} == 'true') {
+          echo "i am inside boucle if of nonreg"
+          $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
+          $content = Get-Content $_
+          if ($content -match '@Nonreg') { $_.FullName -replace '\\', '/' }
           }
+          Write-Host "Nonreg Feature Files:" $featureFiles
+          Write-Host "nonreg is 'true'"
           
           # Convert the array to a comma-separated string
           $env:FEATURE_FILES_STRING = $featureFiles -join ','
