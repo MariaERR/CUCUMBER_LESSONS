@@ -40,67 +40,44 @@ jobs:
           Write-Host "folder-name is ${{ github.event.inputs.folder-name }}"
           
       - name: Run Tests
+        working-directory: ./src
         run: |
-          # Change directory to ./src
-          cd ./src
-
-          # Check if package.json file exists before running npm install
-          $packageJsonPath = "./package.json"
-          if (Test-Path $packageJsonPath) {
-            echo "package.json found. Running npm install..."
-            npm install
+          npm install
+          $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          Write-Host "FOLDER_NAME : $env:FOLDER_NAME"
+          $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
+          Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
+          
+          # Create an empty array to store feature files
+          $featureFiles = @()
+          
+          # Search for feature files based on checkbox selection
+          if (${{ github.event.inputs.all-tests }} == 'true') {
+            $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
+            Write-Host "All Test Feature Files:"
+            $featureFiles
+            Write-Host "all-tests is 'true'"
+          } 
+          elseif (${{ github.event.inputs.nonreg }} == 'true') {
+            $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
+              $content = Get-Content $_
+              if ($content -match '@Nonreg') { $_.FullName -replace '\\', '/' }
+            }
+            Write-Host "Nonreg Feature Files:"
+            $featureFiles
+            Write-Host "nonreg is 'true'"
           } else {
-            echo "Error: package.json file not found."
+            Write-Host "Please select either Nonreg or All Tests checkbox."
             exit 1
           }
-
-          # Display FOLDER_NAME and FEATURE_PATH for debugging
-          echo "FOLDER_NAME input: ${{ github.event.inputs.folder-name }}"
-          echo "FEATURE_PATH input: ${{ env:FEATURE_PATH }}"
-
-          # Set FOLDER_NAME and FEATURE_PATH variables
-          $env:FOLDER_NAME="${{ github.event.inputs.folder-name }}"
-          $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
-
-          # Display updated FOLDER_NAME and FEATURE_PATH for debugging
-          echo "FOLDER_NAME : $env:FOLDER_NAME"
-          echo "FEATURE_PATH : $env:FEATURE_PATH"
-
-
-          # Create an empty array to store feature files
-            $featureFiles = @()
-
-            # Search for feature files based on checkbox selection
-            if (${{ github.event.inputs.all-tests }} == 'true') {
-              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-              Write-Host "All Test Feature Files:"
-              $featureFiles
-              Write-Host "all-tests is 'true'"
-            } 
-            elseif (${{ github.event.inputs.nonreg }} == 'true') {
-              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
-                $content = Get-Content $_
-                if ($content -match '@Nonreg') { $_.FullName -replace '\\', '/' }
-              }
-              Write-Host "Nonreg Feature Files:"
-              $featureFiles
-              Write-Host "nonreg is 'true'"
-            } else {
-              echo "Please select either Nonreg or All Tests checkbox."
-              exit 1
-            }
-
-            # Debug - Output the array of feature files
-            Write-Host "DEBUG - FEATURE_FILES_ARRAY:"
-            $featureFiles
-
-            # Convert the array to a comma-separated string
-            $env:FEATURE_FILES_STRING = $featureFiles -join ','
-            echo "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
-
-            # Check if feature files were found and run the tests
-            if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
-              npm run test $env:FEATURE_FILES_STRING
-            } else {
-              echo "No feature files found in the selected folder."
-            }
+          
+          # Convert the array to a comma-separated string
+          $env:FEATURE_FILES_STRING = $featureFiles -join ','
+          Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
+          
+          # Check if feature files were found and run the tests
+          if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
+            npm run test $env:FEATURE_FILES_STRING
+          } else {
+            Write-Host "No feature files found in the selected folder."
+          }
