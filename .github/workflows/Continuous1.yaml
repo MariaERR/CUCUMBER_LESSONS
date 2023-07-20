@@ -30,13 +30,13 @@ jobs:
         run: |
           cd ./src
           npm install
-           FOLDER_NAME="${{ github.event.inputs.folder-name }}"
+          FOLDER_NAME="${{ github.event.inputs.folder-name }}"
           FEATURE_PATH="./src/Features/tas-apis/$FOLDER_NAME/features"
           FEATURE_FILES=()
           if ${{ github.event.inputs.all-tests }} == true; then
-            FEATURE_FILES+=($(find $FEATURE_PATH -name "*.feature" -type f))
+            FEATURE_FILES=($(find $FEATURE_PATH -name "*.feature" -type f))
           elif ${{ github.event.inputs.nonreg }} == true; then
-            FEATURE_FILES+=($(grep -rl "@Nonreg" $FEATURE_PATH | tr '\n' ' '))
+            FEATURE_FILES=($(grep -rl "@Nonreg" $FEATURE_PATH | tr '\n' ' '))
           else
             echo "Please select either Nonreg or All Tests checkbox."
             exit 1
