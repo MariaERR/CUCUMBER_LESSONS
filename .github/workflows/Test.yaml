@@ -8,7 +8,7 @@ on:
         description: Select the environment
       folder-names:
         type: string
-        description: 'Select the folders to execute tests (use comma for multi-select)'
+        description: 'Enter the folders to execute tests (use comma for multi-select)'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -39,53 +39,34 @@ jobs:
         working-directory: ./src
         run: |
           npm install
-          $env:FOLDER_NAMES = "${{ github.event.inputs.folder-names }}" -split ','
-          Write-Host "FOLDER_NAMES : $env:FOLDER_NAMES"
+          $folderNames = "${{ github.event.inputs.folder-names }}" -split ','
 
-          # Loop through the selected folder names and run the tests
-          foreach ($folderName in $env:FOLDER_NAMES) {
-            $env:FOLDER_NAME = $folderName.Trim()
+          foreach ($folderName in $folderNames) {
+            $env:FOLDER_NAME = $folderName
             Write-Host "FOLDER_NAME : $env:FOLDER_NAME"
             $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
             Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
 
             # Check if the folder exists
-            if (-not (Test-Path $env:FEATURE_PATH)) {
-              Write-Host "Folder $env:FOLDER_NAME does not exist."
-              continue
-            }
+            if (Test-Path -Path $env:FEATURE_PATH) {
+              # Create an empty array to store feature files
+              $featureFiles = @()
 
-            # Create an empty array to store feature files
-            $featureFiles = @()
-
-            # Search for feature files based on test type selection
-            if ("${{ github.event.inputs.test-type }}" -eq 'All Tests') {
-              Write-Host "Running All Test Feature Files"
-              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName }
-            } 
-            elseif ("${{ github.event.inputs.test-type }}" -eq 'Nonreg') {
-              Write-Host "Running Nonreg Feature Files"
-              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
-                $content = Get-Content $_
-                if ($content -match '@nonreg') { $_.FullName }
+              # Search for feature files based on test type selection
+              if ("${{ github.event.inputs.test-type }}" -eq 'All Tests') {
+                Write-Host "Running All Test Feature Files"
+                $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
               }
-            } else {
-              Write-Host "Please select a valid test type."
-              exit 1
-            }
-
-            # Check if feature files were found and run the tests
-            if ($featureFiles.Count -gt 0) {
-              # Loop through the feature files and run the tests
-              foreach ($file in $featureFiles) {
-                Write-Host "Running feature file: $file"
-                npm run test -- $file
+              elseif ("${{ github.event.inputs.test-type }}" -eq 'Nonreg') {
+                Write-Host "Running Nonreg Feature Files"
+                $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
+                  $content = Get-Content $_
+                  if ($content -match '@nonreg') { $_.FullName -replace '\\', '/' }
+                }
+              } else {
+                Write-Host "Please select a valid test type."
+                exit 1
               }
-            } else {
-              Write-Host "No feature files found for the selected test type in folder: $env:FOLDER_NAME."
-            }
 
-            Write-Host "Process completed for folder: $env:FOLDER_NAME."
-          }
-
-          Write-Host "All folders completed."
+              # Check if feature files were found and run the tests
+              if ($featureFiles.Count -gt 0) {
