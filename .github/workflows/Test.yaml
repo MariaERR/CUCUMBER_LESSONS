@@ -33,14 +33,4 @@ jobs:
         run: |
           npm install
           $env:FOLDER_NAMES="${{ github.event.inputs.folder-name }}"
-          $env:TEST_TYPE="${{ github.event.inputs.test-type }}"
-          $folderNames = $env:FOLDER_NAMES -split ','
-          $success = $true
-
-          foreach ($folderName in $folderNames) {
-            $env:FOLDER_NAME=$folderName
-            Write-Host "environment is ${{ github.event.inputs.environment }}"
-            Write-Host "folder-name is $env:FOLDER_NAME"
-            Write-Host "test-type is $env:TEST_TYPE"
-
-            $env:FEATURE_PATH="$PWD/Features/tas-apis/$env:FOLDER_NAME/features"
+         
