@@ -44,11 +44,3 @@ jobs:
             Write-Host "test-type is $env:TEST_TYPE"
 
             $env:FEATURE_PATH="$PWD/Features/tas-apis/$env:FOLDER_NAME/features"
-            Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
-
-            # Create an empty array to store feature files
-            $featureFiles = @()
-
-            # Search for feature files based on test type selection
-            if ($env:TEST_TYPE -eq 'All Tests') {
-              Write-Host "Running All Test Feature
