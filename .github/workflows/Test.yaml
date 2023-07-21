@@ -49,5 +49,32 @@ jobs:
             $featureFiles = @()
 
             # Search for feature files based on test type selection
-            if ($env:TEST_TYPE -eq 'All Tests') {
+              if ($env:TEST_TYPE -eq 'All Tests') {
               Write-Host "Running All Test Feature Files"
+              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
+            } 
+            elseif ($env:TEST_TYPE -eq 'Nonreg') {
+              Write-Host "Running Nonreg Feature Files"
+              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
+                $content = Get-Content $_
+                if ($content -match '@nonreg') { $_.FullName -replace '\\', '/' }
+              }
+            } else {
+              Write-Host "Please select a valid test type."
+              exit 1
+            }
+
+            # Check if feature files were found and run the tests
+            if ($featureFiles.Count -gt 0) {
+              # Loop through the feature files and run the tests individually
+              foreach ($file in $featureFiles) {
+                Write-Host "Running feature file: $file"
+                npm run test -- $file
+              }
+            } else {
+              Write-Host "No feature files found for the selected test type."
+              exit 1
+            }
+
+            Write-Host "Process completed for folder $env:FOLDER_NAME."
+          }
