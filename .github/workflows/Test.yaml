@@ -65,7 +65,7 @@ jobs:
             exit 1
           }
 
-          # Check if feature files were found and run the tests
+           # Check if feature files were found and run the tests
           if ($featureFiles.Count -gt 0) {
             # Convert the array to a comma-separated string
             $env:FEATURE_FILES_STRING = $featureFiles -join ','
