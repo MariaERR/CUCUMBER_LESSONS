@@ -49,15 +49,10 @@ jobs:
           Write-Host "featureFile : $featureFile"
 
           # Search for feature files based on test type selection
-           if ("${{ github.event.inputs.test-type }}" -eq 'All Tests') {
-          Write-Host "Running All Test Feature Files"
-          $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-
-          # Join all feature files into a single string, separated by commas
-          $env:FEATURE_FILES_STRING = $featureFiles -join ','
-          Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
-          npm run test $env:FEATURE_FILES_STRING
-          }
+          if ("${{ github.event.inputs.test-type }}" -eq 'All Tests') {
+            Write-Host "Running All Test Feature Files"
+            $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
+          } 
           elseif ("${{ github.event.inputs.test-type }}" -eq 'Nonreg') {
             Write-Host "Running Nonreg Feature Files"
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
