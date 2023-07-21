@@ -6,9 +6,9 @@ on:
       environment:
         type: environment
         description: Select the environment
-      folder-name:
+      folder-names:
         type: string
-        description: 'Select the folder to execute tests (use comma for multi-select)'
+        description: 'Select the folders to execute tests (use comma for multi-select)'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -32,14 +32,14 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "folder-name is ${{ github.event.inputs.folder-name }}"
+          Write-Host "folder-names is ${{ github.event.inputs.folder-names }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
       - name: Run Tests
         working-directory: ./src
         run: |
           npm install
-          $env:FOLDER_NAMES = "${{ github.event.inputs.folder-name }}" -split ','
+          $env:FOLDER_NAMES = "${{ github.event.inputs.folder-names }}" -split ','
           Write-Host "FOLDER_NAMES : $env:FOLDER_NAMES"
 
           # Loop through the selected folder names and run the tests
@@ -48,6 +48,12 @@ jobs:
             Write-Host "FOLDER_NAME : $env:FOLDER_NAME"
             $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
             Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
+
+            # Check if the folder exists
+            if (-not (Test-Path $env:FEATURE_PATH)) {
+              Write-Host "Folder $env:FOLDER_NAME does not exist."
+              continue
+            }
 
             # Create an empty array to store feature files
             $featureFiles = @()
@@ -76,7 +82,7 @@ jobs:
                 npm run test -- $file
               }
             } else {
-              Write-Host "No feature files found for the selected test type."
+              Write-Host "No feature files found for the selected test type in folder: $env:FOLDER_NAME."
             }
 
             Write-Host "Process completed for folder: $env:FOLDER_NAME."
