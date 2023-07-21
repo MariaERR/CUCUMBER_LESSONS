@@ -34,7 +34,7 @@ jobs:
           npm install
           $env:FOLDER_NAMES="${{ github.event.inputs.folder-name }}"
           $env:TEST_TYPE="${{ github.event.inputs.test-type }}"
-          $folderNames = $env:FOLDER_NAMES -split ','
+          $folderNames = $env:FOLDER_NAMES -split ',' | ForEach-Object { $_.Trim() }
 
           foreach ($folderName in $folderNames) {
             $env:FOLDER_NAME=$folderName
@@ -49,7 +49,7 @@ jobs:
             $featureFiles = @()
 
             # Search for feature files based on test type selection
-              if ($env:TEST_TYPE -eq 'All Tests') {
+            if ($env:TEST_TYPE -eq 'All Tests') {
               Write-Host "Running All Test Feature Files"
               $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
             } 
