@@ -13,8 +13,8 @@ on:
         type: choice
         description: 'Select the type of test'
         options:
-          - All Tests
           - Nonreg
+          - All Tests
 
 jobs:
   build:
