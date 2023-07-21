@@ -67,11 +67,12 @@ jobs:
 
           # Check if feature files were found and run the tests
           if ($featureFiles.Count -gt 0) {
-            # Loop through the feature files and run the tests
-            foreach ($file in $featureFiles) {
-              Write-Host "Running feature file: $file"
-              npm run test -- $file
-            }
+            # Convert the array to a comma-separated string
+            $env:FEATURE_FILES_STRING = $featureFiles -join ','
+            Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
+
+            # Run the tests using the concatenated feature files string
+            npm run test -- $env:FEATURE_FILES_STRING
           } else {
             Write-Host "No feature files found for the selected test type."
           }
