@@ -21,10 +21,15 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # ... (previous steps)
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
 
       - name: Run Tests
-        working-directory: ./CUCUMBER_LESSONS/src  # Adjust the working directory to the correct path
         run: |
           npm install
           $env:FOLDER_NAMES="${{ github.event.inputs.folder-name }}"
@@ -38,7 +43,7 @@ jobs:
             Write-Host "folder-name is $env:FOLDER_NAME"
             Write-Host "test-type is $env:TEST_TYPE"
 
-            $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
+            $env:FEATURE_PATH="$PWD/Features/tas-apis/$env:FOLDER_NAME/features"
             Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
 
             # Create an empty array to store feature files
@@ -49,4 +54,4 @@ jobs:
               Write-Host "Running All Test Feature Files"
               $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
             } 
-            elseif ($env:
+            elseif ($env:TEST_TYPE -eq 'Nonreg') {
