@@ -8,7 +8,7 @@ on:
         description: Select the environment
       folder-name:
         type: string
-        description: 'Select the folder to execute tests (use comma for multi-select)'
+        description: 'Enter the folder to execute tests (use comma for multi-select)'
       test-type:
         type: choice
         description: 'Select the type of test'
