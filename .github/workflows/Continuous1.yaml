@@ -44,15 +44,15 @@ jobs:
           $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
           Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
 
-          # Create an empty array to store feature files
-          $featureFiles = @()
-          Write-Host "featureFile : $featureFile"
-
-          # Search for feature files based on test type selection
+          # Run all feature files when 'All Tests' is selected
           if ("${{ github.event.inputs.test-type }}" -eq 'All Tests') {
             Write-Host "Running All Test Feature Files"
-            $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-          } 
+            $featureFiles = @()
+            foreach ($file in (Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse)) {
+              $featureFiles += $file.FullName -replace '\\', '/'
+            }
+          }
+          # Run only @nonreg tagged feature files when 'Nonreg' is selected
           elseif ("${{ github.event.inputs.test-type }}" -eq 'Nonreg') {
             Write-Host "Running Nonreg Feature Files"
             $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
@@ -64,11 +64,12 @@ jobs:
             exit 1
           }
           
+          # Convert the array to a comma-separated string
+          $env:FEATURE_FILES_STRING = $featureFiles -join ','
+          Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
+          
           # Check if feature files were found and run the tests
-          if ($featureFiles.Count -gt 0) {
-            # Convert the array to a comma-separated string
-            $env:FEATURE_FILES_STRING = $featureFiles -join ','
-            Write-Host "FEATURE_FILES_STRING: $env:FEATURE_FILES_STRING"
+          if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
             npm run test $env:FEATURE_FILES_STRING
           } else {
             Write-Host "No feature files found for the selected test type."
