@@ -70,7 +70,7 @@ jobs:
           
           # Check if feature files were found and run the tests
           if (-not [string]::IsNullOrEmpty($env:FEATURE_FILES_STRING)) {
-            npm run test $env:FEATURE_FILES_STRING
+            npm run test "$env:FEATURE_FILES_STRING"  # <-- Add quotes around the variable
           } else {
             Write-Host "No feature files found for the selected test type."
           }
