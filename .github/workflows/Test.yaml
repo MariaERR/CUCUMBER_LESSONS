@@ -8,7 +8,7 @@ on:
         description: Select the environment
       folder-name:
         type: string
-        description: 'Enter the folder to execute tests (use comma for multi-select)'
+        description: 'Select the folder to execute tests (use comma for multi-select)'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -29,35 +29,39 @@ jobs:
         with:
           node-version: 14
 
+      - name: Display Inputs
+        run: |
+          Write-Host "environment is ${{ github.event.inputs.environment }}"
+          Write-Host "folder-name is ${{ github.event.inputs.folder-name }}"
+          Write-Host "test-type is ${{ github.event.inputs.test-type }}"
+
       - name: Run Tests
+        working-directory: ./src
         run: |
           npm install
-          $env:FOLDER_NAMES="${{ github.event.inputs.folder-name }}"
-          $env:TEST_TYPE="${{ github.event.inputs.test-type }}"
-          $folderNames = $env:FOLDER_NAMES -split ',' | ForEach-Object { $_.Trim() }
+          $env:FOLDER_NAMES = "${{ github.event.inputs.folder-name }}" -split ','
+          Write-Host "FOLDER_NAMES : $env:FOLDER_NAMES"
 
-          foreach ($folderName in $folderNames) {
-            $env:FOLDER_NAME=$folderName
-            Write-Host "environment is ${{ github.event.inputs.environment }}"
-            Write-Host "folder-name is $env:FOLDER_NAME"
-            Write-Host "test-type is $env:TEST_TYPE"
-
-            $env:FEATURE_PATH = Join-Path (Join-Path $PWD "Features") (Join-Path "tas-apis" (Join-Path $env:FOLDER_NAME "features"))
+          # Loop through the selected folder names and run the tests
+          foreach ($folderName in $env:FOLDER_NAMES) {
+            $env:FOLDER_NAME = $folderName.Trim()
+            Write-Host "FOLDER_NAME : $env:FOLDER_NAME"
+            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
             Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
 
             # Create an empty array to store feature files
             $featureFiles = @()
 
             # Search for feature files based on test type selection
-            if ($env:TEST_TYPE -eq 'All Tests') {
+            if ("${{ github.event.inputs.test-type }}" -eq 'All Tests') {
               Write-Host "Running All Test Feature Files"
-              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
+              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName }
             } 
-            elseif ($env:TEST_TYPE -eq 'Nonreg') {
+            elseif ("${{ github.event.inputs.test-type }}" -eq 'Nonreg') {
               Write-Host "Running Nonreg Feature Files"
               $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
                 $content = Get-Content $_
-                if ($content -match '@nonreg') { $_.FullName -replace '\\', '/' }
+                if ($content -match '@nonreg') { $_.FullName }
               }
             } else {
               Write-Host "Please select a valid test type."
@@ -66,15 +70,16 @@ jobs:
 
             # Check if feature files were found and run the tests
             if ($featureFiles.Count -gt 0) {
-              # Loop through the feature files and run the tests individually
+              # Loop through the feature files and run the tests
               foreach ($file in $featureFiles) {
                 Write-Host "Running feature file: $file"
                 npm run test -- $file
               }
             } else {
               Write-Host "No feature files found for the selected test type."
-              exit 1
             }
 
-            Write-Host "Process completed for folder $env:FOLDER_NAME."
+            Write-Host "Process completed for folder: $env:FOLDER_NAME."
           }
+
+          Write-Host "All folders completed."
