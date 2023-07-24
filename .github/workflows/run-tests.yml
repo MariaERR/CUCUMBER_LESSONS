@@ -55,7 +55,7 @@ jobs:
           npm install
           $selected_folders = "${{ github.event.inputs.selected_folders }}" -split ','
           foreach ($folder in $selected_folders) {
-            $env:FOLDER_NAME = $folder
+            $env:FOLDER_NAME = $selectedFolders
             Write-Host "FOLDER_NAME : $env:FOLDER_NAME"
             $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
             Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
