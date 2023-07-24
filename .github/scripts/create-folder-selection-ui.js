@@ -15,8 +15,9 @@ folderNames.forEach((folderName) => {
 
 html += '</body></html>';
 
-// Save the generated HTML to folder-selection.html
+// Save the generated HTML to the workflow log file
 const filePath = path.join(__dirname, '..', 'folder-selection.html');
 fs.writeFileSync(filePath, html);
 
+// Output the file path to be used by the next step
 console.log(`::set-output name=folder-selection-path::${filePath}`);
