@@ -35,9 +35,6 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "sgnum folder selected: ${{ github.event.inputs.sgnum }}"
-          Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
-          Write-Host "test-type is ${{ github.event.inputs['test-type'] }}"
           $selectedFolders = @()
           if (${{ github.event.inputs.sgnum }}) { $selectedFolders += "sgnum" }
           if (${{ github.event.inputs.Test2 }}) { $selectedFolders += "Test2" }
@@ -45,7 +42,6 @@ jobs:
 
           $testType = "${{ github.event.inputs['test-type'] }}"
           Write-Host "Selected test type: $testType"
-
 
       - name: Set up Folder Selection
         id: folder-selection
