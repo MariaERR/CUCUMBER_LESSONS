@@ -52,15 +52,14 @@ jobs:
       - name: Run Tests
         working-directory: ./src
         run: |
-          $selectedFolders = Get-Content $env:GITHUB_ENV | ConvertFrom-StringData
+         $selectedFolders = Get-Content $env:GITHUB_ENV -Raw | ConvertFrom-StringData
           Write-Host "Selected folders: $selectedFolders"
           $testType = "${{ github.event.inputs.test-type }}"
-          Write-Host "Selected test type: $testType"
+
           foreach ($folder in $selectedFolders) {
-            Write-Host "Running tests for folder: $folder"
             $env:FOLDER_NAME = $folder
+            Write-Host "Running tests for folder: $env:FOLDER_NAME"
             $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
             Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
-            # Rest of the test execution code here...
           }
           Write-Host "All folders completed."
