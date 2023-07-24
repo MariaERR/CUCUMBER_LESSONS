@@ -6,9 +6,6 @@ on:
       environment:
         type: environment
         description: Select the environment
-      folder-names:
-        type: string
-        description: 'Select the folders to execute tests (use comma for multi-select)'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -32,8 +29,31 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "folder-names is ${{ github.event.inputs.folder-names }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
+
+      - name: Run Folder Selection Page
+        uses: marocchino/steps@v3
+        with:
+          name: Folder Selection
+          script: |
+            echo "Running folder-selection.html..."
+            curl -o folder-selection.html https://raw.githubusercontent.com/YourUsername/YourRepository/main/folder-selection.html
+          shell: bash
+
+      - name: Deploy Folder Selection Page
+        uses: appleboy/gh-pages-action@v2
+        with:
+          branch: gh-pages
+          folder: .
+
+  run-tests:
+    needs: folder-selection
+    runs-on: windows-latest
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
 
       - name: Install Dependencies
         run: npm install
@@ -41,11 +61,7 @@ jobs:
       - name: Set up Folder Selection
         id: folder-selection
         run: |
-          $folderNames = "${{ github.event.inputs.folder-names }}" -split ','
-          $folderSelection = @{}
-          foreach ($folder in $folderNames) {
-            $folderSelection[$folder] = $true
-          }
+          $folderSelection = Get-Content folder-selection.html
           Write-Output "folder-selection=$folderSelection" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
         shell: pwsh
 
