@@ -1,5 +1,4 @@
-name: CI
-
+name : run test
 on:
   workflow_dispatch:
     inputs:
@@ -30,20 +29,20 @@ jobs:
           Write-Host "environment is ${{ github.event.inputs.environment }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      - name: Run Folder Selection Page
-        uses: marocchino/steps@v3
-        with:
-          name: Folder Selection
-          script: |
-            echo "Running folder-selection.html..."
-            curl -o folder-selection.html https://raw.githubusercontent.com/MariaERR/CUCUMBER_LESSONS/main/folder-selection.html
-          shell: bash
+      - name: Create Folder Selection HTML
+        run: |
+          echo "<html><body><form>"
+          echo "<h2>Folder Selection</h2>"
+          echo "<label for='folder1'><input type='checkbox' name='folder1' value='Folder1'> Folder 1</label><br>"
+          echo "<label for='folder2'><input type='checkbox' name='folder2' value='Folder2'> Folder 2</label><br>"
+          echo "</form></body></html>" > folder-selection.html
+        shell: bash
 
-      - name: Deploy Folder Selection Page
-        uses: appleboy/gh-pages-action@v2
+      - name: Upload Folder Selection HTML
+        uses: actions/upload-artifact@v2
         with:
-          branch: gh-pages
-          folder: .
+          name: folder-selection
+          path: folder-selection.html
 
       - name: Set up Folder Selection
         id: folder-selection
