@@ -6,12 +6,12 @@ on:
       environment:
         type: environment
         description: Select the environment
-      sgnum:
+      folder1:
         type: boolean
-        description: 'Select sgnum'
-      Test2:
+        description: 'Select Folder1'
+      folder2:
         type: boolean
-        description: 'Select Test2'
+        description: 'Select Folder2'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -42,46 +42,4 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Tests
-        working-directory: ./src
-        run: |
-          $folders = @()
-          if (${{ github.event.inputs.folder1 }}) { $folders += "Folder1" }
-          if (${{ github.event.inputs.folder2 }}) { $folders += "Folder2" }
-
-          if ($folders.Count -eq 0) {
-            Write-Host "Please select at least one folder."
-            exit 1
-          }
-
-          $testType = "${{ github.event.inputs.test-type }}"
-          foreach ($folder in $folders) {
-            Write-Host "Running tests for folder: $folder"
-            $env:FOLDER_NAME = $folder
-            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
-
-            if ($testType -eq 'All Tests') {
-              Write-Host "Running All Test Feature Files"
-              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-            } elseif ($testType -eq 'Nonreg') {
-              Write-Host "Running Nonreg Feature Files"
-              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
-                $content = Get-Content $_
-                if ($content -match '@nonreg') { $_.FullName -replace '\\', '/' }
-              }
-            } else {
-              Write-Host "Please select a valid test type."
-              exit 1
-            }
-
-            if ($featureFiles.Count -gt 0) {
-              foreach ($file in $featureFiles) {
-                Write-Host "Running feature file: $file"
-                npm run test -- $file
-              }
-            } else {
-              Write-Host "No feature files found for the selected test type in folder $folder."
-            }
-          }
-
-          Write-Host "All folders completed."
+     
