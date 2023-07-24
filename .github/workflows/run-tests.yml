@@ -53,6 +53,14 @@ jobs:
         working-directory: ./src
         run: |
           npm install
+           $selected_folders = @()
+
+           if ("${{ github.event.inputs.sgnum }}") { $selected_folders += "sgnum" }
+           if ("${{ github.event.inputs.Test2 }}") { $selected_folders += "Test2" }
+
+          Write-Host "Selected folders: $selected_folders"
+          Write-Output "selected_folders=$selected_folders" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+
           $selected_folders = "${{ github.event.inputs.selected_folders }}" -split ' '
           foreach ($folder in $selected_folders) {
             $env:FOLDER_NAME = $folder
