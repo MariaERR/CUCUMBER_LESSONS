@@ -1,0 +1,24 @@
+name: 'Folder Selection Action'
+
+inputs:
+  folder-names:
+    description: 'Comma-separated list of available folder names'
+    required: true
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Display Folder Selection
+      shell: pwsh
+      run: |
+        $folderNames = '${{ inputs.folder-names }}' -split ','
+        $selectedFolders = @()
+
+        foreach ($folderName in $folderNames) {
+          $selected = ('false', 'true' -contains $env:{{ $folderName }})
+          $selectedFolders += $folderName * $selected
+          echo "::set-output name=${folderName}::${selected}"
+        }
+
+        echo "::set-output name=selected-folders::${selectedFolders -join ','}"
