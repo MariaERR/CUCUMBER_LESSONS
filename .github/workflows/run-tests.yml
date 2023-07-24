@@ -48,7 +48,7 @@ jobs:
           Write-Host "Selected folders: $selectedFolders" 
           $selectedFoldersString = $selectedFolders -join ','
           Write-Output "selected_folders=$selectedFoldersString" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
-           Write-Host "Selected folders: $selectedFolders" 
+           Write-Host "Selected selectedFoldersString: $selectedFoldersString" 
         shell: pwsh
       - name: Run Tests
         working-directory: ./src
@@ -64,7 +64,7 @@ jobs:
           $testType = "${{ github.event.inputs.test-type }}"
 
           foreach ($folder in $selectedFolders) {
-            $env:FOLDER_NAME = $folder
+             $env:FOLDER_NAME = $folder.Trim()
             Write-Host "Running tests for folder: $env:FOLDER_NAME"
             $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
             Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
