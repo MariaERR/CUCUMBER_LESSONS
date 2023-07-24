@@ -1,4 +1,4 @@
-name: Run Tests
+name: CI
 
 on:
   workflow_dispatch:
@@ -23,12 +23,6 @@ jobs:
   build:
     runs-on: windows-latest
 
-    strategy:
-      matrix:
-        folder:
-          - sgnum
-          - Test2
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -41,20 +35,40 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "sgnum folder selected: ${{ github.event.inputs.sgnum }}"
-          Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
+          foreach ($folder in (Get-Variable -Name 'env:*' -ValueOnly)) {
+            if ($folder -is [bool]) {
+              $folderName = $folder.Name -replace '^env:', ''
+              Write-Host "$folderName folder selected: $folder"
+            }
+          }
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
+
+      - name: Install Dependencies
+        run: npm install
 
       - name: Run Tests
         working-directory: ./src
         run: |
-          $env:FOLDER_NAME = ${{ matrix.folder }}
-          if ("${{ github.event.inputs[$env:FOLDER_NAME] }}" -eq 'true') {
-            Write-Host "Running tests for folder: $env:FOLDER_NAME"
+          $testType = "${{ github.event.inputs.test-type }}"
+          $selectedFolders = @()
+          foreach ($folder in (Get-Variable -Name 'env:*' -ValueOnly)) {
+            if ($folder -is [bool] -and $folder) {
+              $folderName = $folder.Name -replace '^env:', ''
+              $selectedFolders += $folderName
+            }
+          }
+
+          if ($selectedFolders.Count -eq 0) {
+            Write-Host "No folders selected for execution."
+            exit 1
+          }
+
+          foreach ($folder in $selectedFolders) {
+            Write-Host "Running tests for folder: $folder"
+            $env:FOLDER_NAME = $folder
             $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
             Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
 
-            $testType = "${{ github.event.inputs.test-type }}"
             if ($testType -eq 'All Tests') {
               Write-Host "Running All Test Feature Files"
               $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
@@ -75,10 +89,8 @@ jobs:
                 npm run test -- $file
               }
             } else {
-              Write-Host "No feature files found for the selected test type in folder $env:FOLDER_NAME."
+              Write-Host "No feature files found for the selected test type in folder $folder."
             }
-          } else {
-            Write-Host "Folder $env:FOLDER_NAME is not selected for execution."
           }
 
           Write-Host "All folders completed."
