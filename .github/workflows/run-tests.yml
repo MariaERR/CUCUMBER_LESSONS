@@ -8,10 +8,10 @@ on:
         description: Select the environment
       sgnum:
         type: boolean
-        description: 'Select sgnum folder'
+        description: 'sgnum'
       Test2:
         type: boolean
-        description: 'Select Test2 folder'
+        description: 'Select Test2'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -32,42 +32,32 @@ jobs:
         with:
           node-version: 14
 
-      - name: Set up Folder Selection
-        id: folder-selection
-        run: |
-          selectedFolders=()
-          if [ "${{ github.event.inputs.sgnum }}" = "true" ]; then
-            selectedFolders+=("sgnum")
-          fi
-          if [ "${{ github.event.inputs.Test2 }}" = "true" ]; then
-            selectedFolders+=("Test2")
-          fi
-          echo "selected-folders=${selectedFolders[*]}" >> $GITHUB_ENV
-        shell: bash
-
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          $selectedFolders = $env:selected_folders -split ','
-          foreach ($folder in $selectedFolders) {
-            Write-Host "Selected folder: $folder"
-          }
+          Write-Host "sgnum folder selected: ${{ github.event.inputs.sgnum }}"
+          Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
+          Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-          $testType = "${{ github.event.inputs['test-type'] }}"
-          Write-Host "Selected test type: $testType"
+      - name: Install Dependencies
+        run: npm install
+
       - name: Run Tests
         working-directory: ./src
         run: |
-          $selectedFolders = $env:selected_folders -split ','
+          $selectedFolders = @()
+          if (${{ github.event.inputs.sgnum }}) { $selectedFolders += "sgnum" }
+          if (${{ github.event.inputs.Test2 }}) { $selectedFolders += "Test2" }
+
           Write-Host "Selected folders: $selectedFolders"
-          $testType = "${{ github.event.inputs['test-type'] }}"
-          Write-Host "Selected test type: $testType"
+          Write-Host "Selected test type: ${{ github.event.inputs.test-type }}"
 
           if ($selectedFolders.Count -eq 0) {
             Write-Host "No folders selected for execution."
             exit 1
           }
 
+          $testType = "${{ github.event.inputs.test-type }}"
           foreach ($folder in $selectedFolders) {
             Write-Host "Running tests for folder: $folder"
             $env:FOLDER_NAME = $folder
@@ -77,7 +67,8 @@ jobs:
             if ($testType -eq 'All Tests') {
               Write-Host "Running All Test Feature Files"
               $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-            } elseif ($testType -eq 'Nonreg') {
+            }
+            elseif ($testType -eq 'Nonreg') {
               Write-Host "Running Nonreg Feature Files"
               $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
                 $content = Get-Content $_
