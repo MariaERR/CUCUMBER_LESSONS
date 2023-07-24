@@ -38,19 +38,19 @@ jobs:
           Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      - name: Set up Folder Selection
-        id: folder-selection
-        run: |
-          $selectedFolders = @()
-           echo "Selected folders 0: $selectedFolders"
-          if ("${{ github.event.inputs.sgnum }}") { $selectedFolders += "sgnum" }
-               echo "${{ github.event.inputs.sgnum }}"
-           echo "Selected folders: $selectedFolders"
-          if ("${{ github.event.inputs.Test2 }}") { $selectedFolders += "Test2" }
-          echo "${{ github.event.inputs.Test2 }}"
-          Write-Host "Selected folders: $selectedFolders"
-          Write-Output "selected_folders=$selectedFolders" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
-        shell: pwsh
+            - name: Set up Folder Selection
+          id: folder-selection
+          run: |
+            $selectedFolders = @()
+            Write-Host "Selected folders 0: $selectedFolders"
+            if ("${{ github.event.inputs.sgnum }}") { $selectedFolders += "sgnum" }
+            Write-Host "sgnum: ${{ github.event.inputs.sgnum }}"
+            Write-Host "Selected folders: $selectedFolders"
+            if ("${{ github.event.inputs.Test2 }}") { $selectedFolders += "Test2" }
+            Write-Host "Test2: ${{ github.event.inputs.Test2 }}"
+            Write-Host "Selected folders: $selectedFolders"
+            Write-Output "selected_folders=$selectedFolders" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+          shell: pwsh
 
 
       - name: Run Tests
