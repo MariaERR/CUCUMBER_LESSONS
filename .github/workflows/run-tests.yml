@@ -48,24 +48,13 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          IFS=',' read -ra selectedFolders <<< "${{ env.selected_folders }}"
-          for folder in "${selectedFolders[@]}"; do
+          $selectedFolders = $env:selected_folders -split ','
+          foreach ($folder in $selectedFolders) {
             Write-Host "Selected folder: $folder"
-          done
+          }
 
           $testType = "${{ github.event.inputs['test-type'] }}"
           Write-Host "Selected test type: $testType"
-
-
-      - name: Display Inputs
-        run: |
-          Write-Host "environment is ${{ github.event.inputs.environment }}"
-          $selectedFolders = Get-Content $env:GITHUB_ENV | ConvertFrom-StringData
-          Write-Host "Selected folders: $selectedFolders"
-
-          $testType = "${{ github.event.inputs['test-type'] }}"
-          Write-Host "Selected test type: $testType"
-
 
       - name: Run Tests
         working-directory: ./src
