@@ -35,12 +35,8 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          foreach ($folder in (Get-Variable -Name 'env:*' -ValueOnly)) {
-            if ($folder -is [bool]) {
-              $folderName = $folder.Name -replace '^env:', ''
-              Write-Host "$folderName folder selected: $folder"
-            }
-          }
+          Write-Host "sgnum folder selected: ${{ github.event.inputs.sgnum }}"
+          Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
       - name: Install Dependencies
