@@ -1,4 +1,4 @@
-name: CI
+name: run
 
 on:
   workflow_dispatch:
@@ -49,6 +49,11 @@ jobs:
           $selectedFolders = @()
           if (${{ github.event.inputs.sgnum }}) { $selectedFolders += 'sgnum' }
           if (${{ github.event.inputs.Test2 }}) { $selectedFolders += 'Test2' }
+
+          if ($selectedFolders.Count -eq 0) {
+            Write-Host "No folders selected for execution."
+            exit 1
+          }
 
           foreach ($folder in $selectedFolders) {
             Write-Host "Running tests for folder: $folder"
