@@ -1,4 +1,5 @@
-name : test
+name: Run Tests
+
 on:
   workflow_dispatch:
     inputs:
@@ -7,10 +8,10 @@ on:
         description: Select the environment
       sgnum:
         type: boolean
-        description: 'sgnum'
+        description: 'Select the sgnum folder'
       Test2:
         type: boolean
-        description: 'Test2'
+        description: 'Select the Test2 folder'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -38,20 +39,16 @@ jobs:
           Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-           - name: Set up Folder Selection
-          id: folder-selection
-          run: |
-            $selectedFolders = @()
-            Write-Host "Selected folders 0: $selectedFolders"
-            if ("${{ github.event.inputs.sgnum }}" -eq 'true') { $selectedFolders += "sgnum" }
-            Write-Host "sgnum: ${{ github.event.inputs.sgnum }}"
-            if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "Test2" }
-            Write-Host "Test2: ${{ github.event.inputs.Test2 }}"
-            Write-Host "Selected folders: $($selectedFolders -join ', ')"
-            Write-Output "selected_folders=$($selectedFolders -join ', ')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
-          shell: pwsh
-
-        
+      - name: Set up Folder Selection
+        id: folder-selection
+        run: |
+          $selectedFolders = @()
+          if ("${{ github.event.inputs.sgnum }}" -eq 'true') { $selectedFolders += "sgnum" }
+          if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "Test2" }
+          Write-Host "Selected folders: $selectedFolders"
+          Write-Output "selected_folders=$selectedFolders" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+        shell: pwsh
+      
       - name: Run Tests
         working-directory: ./src
         run: |
