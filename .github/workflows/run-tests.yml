@@ -51,14 +51,17 @@ jobs:
       - name: Run Tests
         working-directory: ./src
         run: |
-           npm install
+          npm install
 
-            # Read selected folders from the environment variable
-           $selectedFolders = $env:selected_folders -split ','
-            Write-Host "Selected folders: $selectedFolders"
-            Write-Host "Selected folders count: $($selectedFolders.Count)"
-            $testType = "${{ github.event.inputs.test-type }}"
-            foreach ($folder in $selectedFolders) {
+          # Read selected folders from the environment variable
+          $selectedFolders = $env:selected_folders -split ','
+
+          Write-Host "Selected folders: $selectedFolders"
+          Write-Host "Selected folders count: $($selectedFolders.Count)"
+
+          $testType = "${{ github.event.inputs.test-type }}"
+
+          foreach ($folder in $selectedFolders) {
             $env:FOLDER_NAME = $folder
             Write-Host "Running tests for folder: $env:FOLDER_NAME"
             $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
