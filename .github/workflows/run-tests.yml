@@ -45,7 +45,8 @@ jobs:
           $folderNames = @("sgnum", "Test2") # Add other folder names here if needed
           $folderSelection = @{}
           foreach ($folder in $folderNames) {
-            $folderSelection[$folder] = "${{ github.event.inputs[$folder] }}" -eq 'true'
+            $isSelected = "${{ github.event.inputs[$folder] }}" -eq 'true'
+            $folderSelection.Add($folder, $isSelected)
           }
           Write-Output "folder-selection=$folderSelection" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
         shell: pwsh
