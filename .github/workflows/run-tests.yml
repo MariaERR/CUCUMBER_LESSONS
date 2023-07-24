@@ -39,25 +39,28 @@ jobs:
           Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run Tests
-        working-directory: ./src
+      - name: Set up Folder Selection
+        id: folder-selection
         run: |
           $selectedFolders = @()
           if (${{ github.event.inputs.sgnum }}) { $selectedFolders += "sgnum" }
           if (${{ github.event.inputs.Test2 }}) { $selectedFolders += "Test2" }
+          Write-Output "selected_folders=$selectedFolders" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+        shell: pwsh
 
+      - name: Run Tests
+        working-directory: ./src
+        run: |
+          $selectedFolders = Get-Content $env:GITHUB_ENV | ConvertFrom-StringData
+          $testType = "${{ github.event.inputs.test-type }}"
           Write-Host "Selected folders: $selectedFolders"
-          Write-Host "Selected test type: ${{ github.event.inputs.test-type }}"
+          Write-Host "Selected test type: $testType"
 
           if ($selectedFolders.Count -eq 0) {
             Write-Host "No folders selected for execution."
             exit 1
           }
 
-          $testType = "${{ github.event.inputs.test-type }}"
           foreach ($folder in $selectedFolders) {
             Write-Host "Running tests for folder: $folder"
             $env:FOLDER_NAME = $folder
@@ -67,8 +70,7 @@ jobs:
             if ($testType -eq 'All Tests') {
               Write-Host "Running All Test Feature Files"
               $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-            }
-            elseif ($testType -eq 'Nonreg') {
+            } elseif ($testType -eq 'Nonreg') {
               Write-Host "Running Nonreg Feature Files"
               $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
                 $content = Get-Content $_
