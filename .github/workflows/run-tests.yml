@@ -1,4 +1,4 @@
-name: Run Tests
+name: CI
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
         description: Select the environment
       folder-names:
         type: string
-        description: 'Select the folders to execute tests (use comma for multi-select)'
+        description: 'Enter the folders to execute tests (use comma for multi-select)'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -29,42 +29,32 @@ jobs:
         with:
           node-version: 14
 
+      - name: Generate Folder Selection UI
+        run: node ./.github/scripts/create-folder-selection-ui.js ${{ github.event.inputs.folder-names }}
+        id: folder-selection
+
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
           Write-Host "folder-names is ${{ github.event.inputs.folder-names }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      - name: Create Folder Selection UI
-        id: create-ui
+      - name: Display Folder Selection UI
         run: |
-          folderNames="${{ github.event.inputs.folder-names }}"
-          echo "<h2>Folder Selection</h2>" > folder-selection.html
-          IFS=',' read -ra folders <<< "$folderNames"
-          for folder in "${folders[@]}"; do
-            echo "<input type=\"checkbox\" name=\"folder\" value=\"$folder\"> $folder<br>" >> folder-selection.html
-          done
-          echo "Folder selection UI created."
-
-      - name: Deploy Folder Selection UI
-        uses: actions/upload-artifact@v2
-        with:
-          name: folder-selection-ui
-          path: folder-selection.html
-
-      - name: Display Folder Selection URL
-        run: |
-          echo "Click here to select folders: ${{ steps.create-ui.outputs.artifact_url }}"
+          $folderSelectionPath = '${{ steps.folder-selection.outputs.folder-selection-path }}'
+          Write-Host "Click the link to access the Folder Selection UI:"
+          Write-Host "file://$folderSelectionPath"
 
       - name: Run Tests
-        if: startsWith(github.ref, 'refs/tags/') && github.event.inputs.test-type == 'All Tests'
+        if: ${{ github.event.inputs.folder-names != '' && steps.folder-selection.outputs.folder-selection-path != '' }}
+        working-directory: ./src
         run: |
           npm install
-          FOLDER_NAMES=$(curl -sL "${{ steps.create-ui.outputs.artifact_url }}" | grep "name=\"folder\"" | awk -F "\"" '{print $6}')
-          for folder in $FOLDER_NAMES; do
-            $env:FOLDER_NAME=$folder
-            $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
-            Write-Host "Running All Test Feature Files for folder: $env:FOLDER_NAME"
-            # Add your test command here, for example:
-            # npm run test $env:FEATURE_PATH/*.feature
-          done
+          $folderNames = "${{ github.event.inputs.folder-names }}" -split ','
+
+          foreach ($folderName in $folderNames) {
+            $env:FOLDER_NAME = $folderName
+            # ... (rest of the existing code to run tests for selected folders)
+          }
+
+          Write-Host "All folders completed."
