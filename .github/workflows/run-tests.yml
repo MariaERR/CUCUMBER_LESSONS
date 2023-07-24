@@ -48,7 +48,6 @@ jobs:
           Write-Host "Selected folders: $selectedFolders"
           Write-Output "selected_folders=$selectedFolders" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
         shell: pwsh
-      
       - name: Run Tests
         working-directory: ./src
         run: |
