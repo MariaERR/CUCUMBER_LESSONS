@@ -8,10 +8,10 @@ on:
         description: Select the environment
       sgnum:
         type: boolean
-        description: 'Select the sgnum folder'
+        description: 'sgnum'
       Test2:
         type: boolean
-        description: 'Select the Test2 folder'
+        description: 'Test2'
       test-type:
         type: choice
         description: 'Select the type of test'
