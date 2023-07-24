@@ -35,23 +35,33 @@ jobs:
           Write-Host "folder-names is ${{ github.event.inputs.folder-names }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      - name: Install http-server
-        run: npm install -g http-server
-
-      - name: Display checkboxes UI
+      - name: Create Folder Selection UI
+        id: create-ui
         run: |
-          mkdir -p .github/workflow-ui
-          echo '<h2>Folder Selection</h2>' > .github/workflow-ui/index.html
-          echo '<input type="checkbox" name="folder" value="folder1"> Folder 1<br>' >> .github/workflow-ui/index.html
-          echo '<input type="checkbox" name="folder" value="folder2"> Folder 2<br>' >> .github/workflow-ui/index.html
-          # Add more folders as needed
+          folderNames="${{ github.event.inputs.folder-names }}"
+          echo "<h2>Folder Selection</h2>" > folder-selection.html
+          IFS=',' read -ra folders <<< "$folderNames"
+          for folder in "${folders[@]}"; do
+            echo "<input type=\"checkbox\" name=\"folder\" value=\"$folder\"> $folder<br>" >> folder-selection.html
+          done
+          echo "Folder selection UI created."
+
+      - name: Deploy Folder Selection UI
+        uses: actions/upload-artifact@v2
+        with:
+          name: folder-selection-ui
+          path: folder-selection.html
+
+      - name: Display Folder Selection URL
+        run: |
+          echo "Click here to select folders: ${{ steps.create-ui.outputs.artifact_url }}"
 
       - name: Run Tests
         if: startsWith(github.ref, 'refs/tags/') && github.event.inputs.test-type == 'All Tests'
         run: |
           npm install
-          folders=$(http-server .github/workflow-ui -p 8000 -s -c-1 | grep "name=\"folder\"" | awk -F "\"" '{print $6}')
-          for folder in $folders; do
+          FOLDER_NAMES=$(curl -sL "${{ steps.create-ui.outputs.artifact_url }}" | grep "name=\"folder\"" | awk -F "\"" '{print $6}')
+          for folder in $FOLDER_NAMES; do
             $env:FOLDER_NAME=$folder
             $env:FEATURE_PATH="./Features/tas-apis/$env:FOLDER_NAME/features"
             Write-Host "Running All Test Feature Files for folder: $env:FOLDER_NAME"
