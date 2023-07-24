@@ -32,17 +32,6 @@ jobs:
         with:
           node-version: 14
 
-      - name: Display Inputs
-        run: |
-          Write-Host "environment is ${{ github.event.inputs.environment }}"
-          $selectedFolders = @()
-          if (${{ github.event.inputs.sgnum }}) { $selectedFolders += "sgnum" }
-          if (${{ github.event.inputs.Test2 }}) { $selectedFolders += "Test2" }
-          Write-Host "Selected folders: $selectedFolders"
-
-          $testType = "${{ github.event.inputs['test-type'] }}"
-          Write-Host "Selected test type: $testType"
-
       - name: Set up Folder Selection
         id: folder-selection
         run: |
@@ -51,6 +40,16 @@ jobs:
           if (${{ github.event.inputs.Test2 }}) { $selectedFolders += "Test2" }
           Write-Output "selected-folders=$selectedFolders" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
         shell: pwsh
+
+      - name: Display Inputs
+        run: |
+          Write-Host "environment is ${{ github.event.inputs.environment }}"
+          $selectedFolders = Get-Content $env:GITHUB_ENV | ConvertFrom-StringData
+          Write-Host "Selected folders: $selectedFolders"
+
+          $testType = "${{ github.event.inputs['test-type'] }}"
+          Write-Host "Selected test type: $testType"
+
 
       - name: Run Tests
         working-directory: ./src
