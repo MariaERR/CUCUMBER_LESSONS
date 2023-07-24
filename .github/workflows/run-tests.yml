@@ -1,4 +1,4 @@
-name: test
+name: Run Tests
 
 on:
   workflow_dispatch:
@@ -35,61 +35,55 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          foreach ($folder in (Get-Variable -Name 'env:*' -ValueOnly)) {
-            if ($folder -is [bool]) {
-              $folderName = $folder.Name -replace '^env:', ''
-              Write-Host "$folderName folder selected: $folder"
-            }
-          }
+          Write-Host "sgnum folder selected: ${{ github.event.inputs.sgnum }}"
+          Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Set up Folder Selection
+        id: folder-selection
+        run: |
+          $folderNames = @("sgnum", "Test2") # Add other folder names here if needed
+          $folderSelection = @{}
+          foreach ($folder in $folderNames) {
+            $folderSelection[$folder] = "${{ github.event.inputs[$folder] }}" -eq 'true'
+          }
+          Write-Output "folder-selection=$folderSelection" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+        shell: pwsh
 
       - name: Run Tests
         working-directory: ./src
         run: |
+          $folderSelection = Get-Content $env:GITHUB_ENV | ConvertFrom-StringData
           $testType = "${{ github.event.inputs.test-type }}"
-          $selectedFolders = @()
-          foreach ($folder in (Get-Variable -Name 'env:*' -ValueOnly)) {
-            if ($folder -is [bool] -and $folder) {
-              $folderName = $folder.Name -replace '^env:', ''
-              $selectedFolders += $folderName
-            }
-          }
+          foreach ($folder in $folderSelection.GetEnumerator()) {
+            $env:FOLDER_NAME = $folder.Key
+            if ($folder.Value) {
+              Write-Host "Running tests for folder: $env:FOLDER_NAME"
+              $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
+              Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
 
-          if ($selectedFolders.Count -eq 0) {
-            Write-Host "No folders selected for execution."
-            exit 1
-          }
-
-          foreach ($folder in $selectedFolders) {
-            Write-Host "Running tests for folder: $folder"
-            $env:FOLDER_NAME = $folder
-            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
-            Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
-
-            if ($testType -eq 'All Tests') {
-              Write-Host "Running All Test Feature Files"
-              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-            } elseif ($testType -eq 'Nonreg') {
-              Write-Host "Running Nonreg Feature Files"
-              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
-                $content = Get-Content $_
-                if ($content -match '@nonreg') { $_.FullName -replace '\\', '/' }
+              if ($testType -eq 'All Tests') {
+                Write-Host "Running All Test Feature Files"
+                $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
+              } elseif ($testType -eq 'Nonreg') {
+                Write-Host "Running Nonreg Feature Files"
+                $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
+                  $content = Get-Content $_
+                  if ($content -match '@nonreg') { $_.FullName -replace '\\', '/' }
+                }
+              } else {
+                Write-Host "Please select a valid test type."
+                exit 1
               }
-            } else {
-              Write-Host "Please select a valid test type."
-              exit 1
-            }
 
-            if ($featureFiles.Count -gt 0) {
-              foreach ($file in $featureFiles) {
-                Write-Host "Running feature file: $file"
-                npm run test -- $file
+              if ($featureFiles.Count -gt 0) {
+                foreach ($file in $featureFiles) {
+                  Write-Host "Running feature file: $file"
+                  npm run test -- $file
+                }
+              } else {
+                Write-Host "No feature files found for the selected test type in folder $env:FOLDER_NAME."
               }
-            } else {
-              Write-Host "No feature files found for the selected test type in folder $folder."
             }
           }
 
