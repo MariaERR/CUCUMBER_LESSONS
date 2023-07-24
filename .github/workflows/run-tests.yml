@@ -1,4 +1,4 @@
-name: Run Tests
+name: CI
 
 on:
   workflow_dispatch:
@@ -6,9 +6,6 @@ on:
       environment:
         type: environment
         description: Select the environment
-      folder-names:
-        type: string
-        description: 'Select the folders to execute tests (use comma for multi-select)'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -32,42 +29,28 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "folder-names is ${{ github.event.inputs.folder-names }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      # Include the JavaScript file
-      - name: Include JavaScript for folder checkboxes
-        run: |
-          mkdir -p .github/scripts
-          curl -o .github/scripts/checkbox-folders.js https://raw.githubusercontent.com/<YOUR_REPOSITORY>/main/checkbox-folders.js
+      - name: Run Folder Selection Action
+        uses: ./.github/workflows/folder-selection-action.yml
+        with:
+          folder-names: ${{ github.event.inputs.folder-names }}
 
-      - name: Run Tests
-        working-directory: ./src
-        run: |
-          npm install
-          $selectedFolders = "${{ github.event.inputs.folder-names }}" -split ','
+      - name: View Folder Selection Page
+        run: echo "::set-output name=folder_page_path::folder-selection.html"
 
-          foreach ($folder in $selectedFolders) {
-            $env:FOLDER_NAME = $folder
-            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
+      - name: Upload Folder Selection Page
+        uses: actions/upload-artifact@v2
+        with:
+          name: folder-selection-page
+          path: folder-selection.html
 
-            if (Test-Path -Path $env:FEATURE_PATH) {
-              $files = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-              $featureFiles += $files
-            } else {
-              Write-Host "Folder $folder does not exist."
-            }
-          }
-
-          # Check if feature files were found and run the tests
-          if ($featureFiles.Count -gt 0) {
-            # Loop through the feature files and run the tests
-            foreach ($file in $featureFiles) {
-              Write-Host "Running feature file: $file"
-              npm run test -- $file
-            }
-          } else {
-            Write-Host "No feature files found for the selected test type."
-          }
-
-          Write-Host "Process completed."
+      - name: Deploy Folder Selection Page
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            cd path/to/your/project
+            mv /github/workspace/folder-selection.html path/to/your/project
