@@ -1,4 +1,4 @@
-name: run
+name: test
 
 on:
   workflow_dispatch:
@@ -35,8 +35,12 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "sgnum folder selected: ${{ github.event.inputs.sgnum }}"
-          Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
+          foreach ($folder in (Get-Variable -Name 'env:*' -ValueOnly)) {
+            if ($folder -is [bool]) {
+              $folderName = $folder.Name -replace '^env:', ''
+              Write-Host "$folderName folder selected: $folder"
+            }
+          }
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
       - name: Install Dependencies
@@ -47,8 +51,12 @@ jobs:
         run: |
           $testType = "${{ github.event.inputs.test-type }}"
           $selectedFolders = @()
-          if (${{ github.event.inputs.sgnum }}) { $selectedFolders += 'sgnum' }
-          if (${{ github.event.inputs.Test2 }}) { $selectedFolders += 'Test2' }
+          foreach ($folder in (Get-Variable -Name 'env:*' -ValueOnly)) {
+            if ($folder -is [bool] -and $folder) {
+              $folderName = $folder.Name -replace '^env:', ''
+              $selectedFolders += $folderName
+            }
+          }
 
           if ($selectedFolders.Count -eq 0) {
             Write-Host "No folders selected for execution."
