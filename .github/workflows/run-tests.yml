@@ -1,4 +1,4 @@
-name: run tests
+name: CI
 
 on:
   workflow_dispatch:
@@ -6,6 +6,9 @@ on:
       environment:
         type: environment
         description: Select the environment
+      folder-names:
+        type: string
+        description: 'Select the folders to execute tests (use comma for multi-select)'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -29,25 +32,58 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
+          Write-Host "folder-names is ${{ github.event.inputs.folder-names }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      - name: Run Folder Selection Action
-        uses: ./.github/workflows/folder-selection-action.yml
-        with:
-          folder-names: ${{ github.event.inputs.folder-names }}
+      - name: Install Dependencies
+        run: npm install
 
-      - name: Upload Folder Selection Page
-        uses: actions/upload-artifact@v2
-        with:
-          name: folder-selection-page
-          path: folder-selection.html
+      - name: Set up Folder Selection
+        id: folder-selection
+        run: |
+          $folderNames = "${{ github.event.inputs.folder-names }}" -split ','
+          $folderSelection = @{}
+          foreach ($folder in $folderNames) {
+            $folderSelection[$folder] = $true
+          }
+          Write-Output "folder-selection=$folderSelection" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+        shell: pwsh
 
-      - name: Deploy Folder Selection Page
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          script: |
-            cd path/to/your/project
-            mv /github/workspace/folder-selection.html path/to/your/project
+      - name: Run Tests
+        working-directory: ./src
+        run: |
+          $folderSelection = Get-Content $env:GITHUB_ENV | ConvertFrom-StringData
+          $testType = "${{ github.event.inputs.test-type }}"
+          foreach ($folder in $folderSelection.GetEnumerator()) {
+            $env:FOLDER_NAME = $folder.Key
+            if ($folder.Value) {
+              Write-Host "Running tests for folder: $env:FOLDER_NAME"
+              $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
+              Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
+
+              if ($testType -eq 'All Tests') {
+                Write-Host "Running All Test Feature Files"
+                $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
+              } elseif ($testType -eq 'Nonreg') {
+                Write-Host "Running Nonreg Feature Files"
+                $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
+                  $content = Get-Content $_
+                  if ($content -match '@nonreg') { $_.FullName -replace '\\', '/' }
+                }
+              } else {
+                Write-Host "Please select a valid test type."
+                exit 1
+              }
+
+              if ($featureFiles.Count -gt 0) {
+                foreach ($file in $featureFiles) {
+                  Write-Host "Running feature file: $file"
+                  npm run test -- $file
+                }
+              } else {
+                Write-Host "No feature files found for the selected test type in folder $env:FOLDER_NAME."
+              }
+            }
+          }
+
+          Write-Host "All folders completed."
