@@ -34,8 +34,14 @@ jobs:
         run: |
           echo "<html><body><form>"
           echo "<h2>Folder Selection</h2>"
-          echo "<label for='folder1'><input type='checkbox' name='folder1' value='Folder1'> Folder 1</label><br>"
-          echo "<label for='folder2'><input type='checkbox' name='folder2' value='Folder2'> Folder 2</label><br>"
+
+          # Define the folders list here, you can add more folders as needed
+          $folders = "Folder1", "Folder2"
+
+          foreach ($folder in $folders) {
+            echo "<label for='$folder'><input type='checkbox' name='folders' value='$folder'> $folder</label><br>"
+          }
+
           echo "</form></body></html>" > folder-selection.html
         shell: bash
 
@@ -50,11 +56,23 @@ jobs:
           name: folder-selection
           path: folder-selection.html
 
-      - name: Set up Folder Selection
-        id: folder-selection
+      - name: Read Folder Selection and Run Tests
+        id: run-tests
         run: |
-          $folderSelection = Get-Content folder-selection.html
-          Write-Output "folder-selection=$folderSelection" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+          $foldersInput = Get-Content folder-selection.html
+          $folders = $foldersInput -split 'value=' | ForEach-Object {
+            if ($_ -match '".*"') {
+              $folder = ($_ -replace '"', '').Trim()
+              $folder
+            }
+          }
+          $selectedFolders = $folders -join ','
+          Write-Output "Selected folders: $selectedFolders"
+          
+          # Use the $selectedFolders variable in your test script to execute tests for the selected folders
+          # Replace the script below with your actual test execution command
+          npm install
+          npm run test --folders="$selectedFolders"
         shell: pwsh
 
       # Rest of the workflow remains unchanged
