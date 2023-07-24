@@ -55,13 +55,20 @@ jobs:
 
           $testType = "${{ github.event.inputs['test-type'] }}"
           Write-Host "Selected test type: $testType"
-
       - name: Run Tests
         working-directory: ./src
         run: |
-          $selectedFolders = Get-Content $env:GITHUB_ENV | ConvertFrom-StringData
-          $testType = "${{ github.event.inputs.test-type }}"
-          foreach ($folder in $selectedFolders.GetEnumerator()) {
+          $selectedFolders = $env:selected_folders -split ','
+          Write-Host "Selected folders: $selectedFolders"
+          $testType = "${{ github.event.inputs['test-type'] }}"
+          Write-Host "Selected test type: $testType"
+
+          if ($selectedFolders.Count -eq 0) {
+            Write-Host "No folders selected for execution."
+            exit 1
+          }
+
+          foreach ($folder in $selectedFolders) {
             Write-Host "Running tests for folder: $folder"
             $env:FOLDER_NAME = $folder
             $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
@@ -87,7 +94,7 @@ jobs:
                 npm run test -- $file
               }
             } else {
-              Write-Host "No feature files found for the selected test type in folder $env:FOLDER_NAME."
+              Write-Host "No feature files found for the selected test type in folder $folder."
             }
           }
 
