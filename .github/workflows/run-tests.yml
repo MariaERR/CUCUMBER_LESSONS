@@ -1,4 +1,4 @@
-name: Run Test
+name: CI
 
 on:
   workflow_dispatch:
@@ -6,9 +6,6 @@ on:
       environment:
         type: environment
         description: Select the environment
-      folder-names:
-        type: string
-        description: 'Enter the folders to execute tests (use comma for multi-select)'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -29,32 +26,32 @@ jobs:
         with:
           node-version: 14
 
-      - name: Generate Folder Selection UI
-        run: node ./.github/scripts/create-folder-selection-ui.js ${{ github.event.inputs.folder-names }}
-        id: folder-selection
-
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "folder-names is ${{ github.event.inputs.folder-names }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      - name: Display Folder Selection UI
-        run: |
-          $folderSelectionPath = '${{ steps.folder-selection.outputs.folder-selection-path }}'
-          Write-Host "Click the link to access the Folder Selection UI:"
-          Write-Host "file://$folderSelectionPath"
+      - name: Folder Selection
+        id: folder_selection
+        uses: ./.github/actions/folder-selection-action
+        with:
+          folder-names: 'sgnum,Test2'  # Replace with your available folder names separated by comma
 
       - name: Run Tests
-        if: ${{ github.event.inputs.folder-names != '' && steps.folder-selection.outputs.folder-selection-path != '' }}
         working-directory: ./src
         run: |
           npm install
-          $folderNames = "${{ github.event.inputs.folder-names }}" -split ','
+          $selectedFolders = "${{ steps.folder_selection.outputs.selected-folders }}" -split ','
 
-          foreach ($folderName in $folderNames) {
+          # Loop through the selected folders and run the tests for each one
+          foreach ($folderName in $selectedFolders) {
             $env:FOLDER_NAME = $folderName
-            # ... (rest of the existing code to run tests for selected folders)
+            Write-Host "Running tests for folder: $folderName"
+            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
+            Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
+
+            # Add your logic to run the tests for each folder here
+            # You can use the same logic you had in your previous script
           }
 
           Write-Host "All folders completed."
