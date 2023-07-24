@@ -1,4 +1,4 @@
-name: run-tests
+name: Run Tests
 
 on:
   workflow_dispatch:
@@ -6,6 +6,9 @@ on:
       environment:
         type: environment
         description: Select the environment
+      folder-names:
+        type: string
+        description: 'Select the folders to execute tests (use comma for multi-select)'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -29,29 +32,42 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
+          Write-Host "folder-names is ${{ github.event.inputs.folder-names }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      - name: Folder Selection
-        id: folder_selection
-        uses: ./.github/actions/folder-selection-action
-        with:
-          folder-names: 'sgnum,Test2'  # Replace with your available folder names separated by comma
+      # Include the JavaScript file
+      - name: Include JavaScript for folder checkboxes
+        run: |
+          mkdir -p .github/scripts
+          curl -o .github/scripts/checkbox-folders.js https://raw.githubusercontent.com/<YOUR_REPOSITORY>/main/checkbox-folders.js
 
       - name: Run Tests
         working-directory: ./src
         run: |
           npm install
-          $selectedFolders = "${{ steps.folder_selection.outputs.selected-folders }}" -split ','
+          $selectedFolders = "${{ github.event.inputs.folder-names }}" -split ','
 
-          # Loop through the selected folders and run the tests for each one
-          foreach ($folderName in $selectedFolders) {
-            $env:FOLDER_NAME = $folderName
-            Write-Host "Running tests for folder: $folderName"
+          foreach ($folder in $selectedFolders) {
+            $env:FOLDER_NAME = $folder
             $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
-            Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
 
-            # Add your logic to run the tests for each folder here
-            # You can use the same logic you had in your previous script
+            if (Test-Path -Path $env:FEATURE_PATH) {
+              $files = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
+              $featureFiles += $files
+            } else {
+              Write-Host "Folder $folder does not exist."
+            }
           }
 
-          Write-Host "All folders completed."
+          # Check if feature files were found and run the tests
+          if ($featureFiles.Count -gt 0) {
+            # Loop through the feature files and run the tests
+            foreach ($file in $featureFiles) {
+              Write-Host "Running feature file: $file"
+              npm run test -- $file
+            }
+          } else {
+            Write-Host "No feature files found for the selected test type."
+          }
+
+          Write-Host "Process completed."
