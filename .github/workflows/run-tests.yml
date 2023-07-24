@@ -52,21 +52,21 @@ jobs:
       - name: Run Tests
         working-directory: ./src
         run: |
-          npm install
-           $selected_folders = @()
+           npm install
 
-           if ("${{ github.event.inputs.sgnum }}") { $selected_folders += "sgnum" }
-           if ("${{ github.event.inputs.Test2 }}") { $selected_folders += "Test2" }
+                    # Read selected folders from the environment variable
+                    $selectedFolders = $env:selected_folders -split ','
 
-          Write-Host "Selected folders: $selected_folders"
-          Write-Output "selected_folders=$selected_folders" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+                    Write-Host "Selected folders: $selectedFolders"
+                    Write-Host "Selected folders count: $($selectedFolders.Count)"
 
-          $selected_folders = "${{ github.event.inputs.selected_folders }}" -split ' '
-          foreach ($folder in $selected_folders) {
-            $env:FOLDER_NAME = $folder
-            Write-Host "FOLDER_NAME : $env:FOLDER_NAME"
-            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
-            Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
+                    $testType = "${{ github.event.inputs.test-type }}"
+
+                    foreach ($folder in $selectedFolders) {
+                      $env:FOLDER_NAME = $folder
+                      Write-Host "Running tests for folder: $env:FOLDER_NAME"
+                      $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
+                      Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
 
             # Check if the folder exists
             if (Test-Path -Path $env:FEATURE_PATH) {
