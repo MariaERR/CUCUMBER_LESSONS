@@ -12,12 +12,9 @@ on:
       Test2:
         type: boolean
         description: 'Select Test2 folder'
-      test-type:
-        type: choice
-        description: 'Select the type of test'
-        options:
-          - Nonreg
-          - All Tests
+      folder-names:
+        type: array
+        description: 'Select the folders to execute tests'
 
 jobs:
   build:
@@ -37,7 +34,10 @@ jobs:
           Write-Host "environment is ${{ github.event.inputs.environment }}"
           Write-Host "sgnum folder selected: ${{ github.event.inputs.sgnum }}"
           Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
-          Write-Host "test-type is ${{ github.event.inputs.test-type }}"
+          Write-Host "folder-names is ${{ toJson(github.event.inputs['folder-names']) }}"
+          $selectedFolders = ${{ toJson(github.event.inputs['folder-names']) | fromJson }}
+          Write-Host "Selected folders: $selectedFolders"
+
 
       - name: Set up Folder Selection
         id: folder-selection
