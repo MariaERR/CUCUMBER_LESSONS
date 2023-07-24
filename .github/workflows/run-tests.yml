@@ -36,9 +36,6 @@ jobs:
         with:
           folder-names: ${{ github.event.inputs.folder-names }}
 
-      - name: View Folder Selection Page
-        run: echo "::set-output name=folder_page_path::folder-selection.html"
-
       - name: Upload Folder Selection Page
         uses: actions/upload-artifact@v2
         with:
