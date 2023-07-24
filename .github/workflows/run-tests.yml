@@ -1,4 +1,4 @@
-name: run tests
+name: CI
 
 on:
   workflow_dispatch:
@@ -16,7 +16,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -37,7 +36,7 @@ jobs:
           name: Folder Selection
           script: |
             echo "Running folder-selection.html..."
-            curl -o folder-selection.html https://raw.githubusercontent.com/YourUsername/YourRepository/main/folder-selection.html
+            curl -o folder-selection.html https://raw.githubusercontent.com/MariaERR/CUCUMBER_LESSONS/main/folder-selection.html
           shell: bash
 
       - name: Deploy Folder Selection Page
@@ -45,18 +44,6 @@ jobs:
         with:
           branch: gh-pages
           folder: .
-
-  run-tests:
-    needs: folder-selection
-    runs-on: windows-latest
-    steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-
-      - name: Install Dependencies
-        run: npm install
 
       - name: Set up Folder Selection
         id: folder-selection
