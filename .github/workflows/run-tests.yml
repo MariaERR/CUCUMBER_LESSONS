@@ -1,4 +1,5 @@
-name : run test
+name: CI
+
 on:
   workflow_dispatch:
     inputs:
@@ -38,6 +39,11 @@ jobs:
           echo "</form></body></html>" > folder-selection.html
         shell: bash
 
+      - name: Display Folder Selection HTML
+        run: |
+          Get-Content folder-selection.html
+        shell: pwsh
+
       - name: Upload Folder Selection HTML
         uses: actions/upload-artifact@v2
         with:
@@ -50,6 +56,8 @@ jobs:
           $folderSelection = Get-Content folder-selection.html
           Write-Output "folder-selection=$folderSelection" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
         shell: pwsh
+
+      # Rest of the workflow remains unchanged
 
       - name: Run Tests
         working-directory: ./src
