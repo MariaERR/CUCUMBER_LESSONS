@@ -1,4 +1,4 @@
-name: CI
+name: run
 
 on:
   workflow_dispatch:
@@ -6,6 +6,12 @@ on:
       environment:
         type: environment
         description: Select the environment
+      sgnum:
+        type: boolean
+        description: 'Select sgnum'
+      Test2:
+        type: boolean
+        description: 'Select Test2'
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -16,6 +22,7 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -28,89 +35,52 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
+          Write-Host "folder1 is ${{ github.event.inputs.folder1 }}"
+          Write-Host "folder2 is ${{ github.event.inputs.folder2 }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
-      - name: Create Folder Selection HTML
-        run: |
-          echo "<html><body><form>"
-          echo "<h2>Folder Selection</h2>"
-
-          # Define the folders list here, you can add more folders as needed
-          $folders = "Folder1", "Folder2"
-
-          foreach ($folder in $folders) {
-            echo "<label for='$folder'><input type='checkbox' name='folders' value='$folder'> $folder</label><br>"
-          }
-
-          echo "</form></body></html>" > folder-selection.html
-        shell: bash
-
-      - name: Display Folder Selection HTML
-        run: |
-          Get-Content folder-selection.html
-        shell: pwsh
-
-      - name: Upload Folder Selection HTML
-        uses: actions/upload-artifact@v2
-        with:
-          name: folder-selection
-          path: folder-selection.html
-
-      - name: Read Folder Selection and Run Tests
-        id: run-tests
-        run: |
-          $foldersInput = Get-Content folder-selection.html
-          $folders = $foldersInput -split 'value=' | ForEach-Object {
-            if ($_ -match '".*"') {
-              $folder = ($_ -replace '"', '').Trim()
-              $folder
-            }
-          }
-          $selectedFolders = $folders -join ','
-          Write-Output "Selected folders: $selectedFolders"
-          
-          # Use the $selectedFolders variable in your test script to execute tests for the selected folders
-          # Replace the script below with your actual test execution command
-          npm install
-          npm run test --folders="$selectedFolders"
-        shell: pwsh
-
-      # Rest of the workflow remains unchanged
+      - name: Install Dependencies
+        run: npm install
 
       - name: Run Tests
         working-directory: ./src
         run: |
-          $folderSelection = Get-Content $env:GITHUB_ENV | ConvertFrom-StringData
+          $folders = @()
+          if (${{ github.event.inputs.folder1 }}) { $folders += "Folder1" }
+          if (${{ github.event.inputs.folder2 }}) { $folders += "Folder2" }
+
+          if ($folders.Count -eq 0) {
+            Write-Host "Please select at least one folder."
+            exit 1
+          }
+
           $testType = "${{ github.event.inputs.test-type }}"
-          foreach ($folder in $folderSelection.GetEnumerator()) {
-            $env:FOLDER_NAME = $folder.Key
-            if ($folder.Value) {
-              Write-Host "Running tests for folder: $env:FOLDER_NAME"
-              $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
-              Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
+          foreach ($folder in $folders) {
+            Write-Host "Running tests for folder: $folder"
+            $env:FOLDER_NAME = $folder
+            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
 
-              if ($testType -eq 'All Tests') {
-                Write-Host "Running All Test Feature Files"
-                $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
-              } elseif ($testType -eq 'Nonreg') {
-                Write-Host "Running Nonreg Feature Files"
-                $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
-                  $content = Get-Content $_
-                  if ($content -match '@nonreg') { $_.FullName -replace '\\', '/' }
-                }
-              } else {
-                Write-Host "Please select a valid test type."
-                exit 1
+            if ($testType -eq 'All Tests') {
+              Write-Host "Running All Test Feature Files"
+              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
+            } elseif ($testType -eq 'Nonreg') {
+              Write-Host "Running Nonreg Feature Files"
+              $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
+                $content = Get-Content $_
+                if ($content -match '@nonreg') { $_.FullName -replace '\\', '/' }
               }
+            } else {
+              Write-Host "Please select a valid test type."
+              exit 1
+            }
 
-              if ($featureFiles.Count -gt 0) {
-                foreach ($file in $featureFiles) {
-                  Write-Host "Running feature file: $file"
-                  npm run test -- $file
-                }
-              } else {
-                Write-Host "No feature files found for the selected test type in folder $env:FOLDER_NAME."
+            if ($featureFiles.Count -gt 0) {
+              foreach ($file in $featureFiles) {
+                Write-Host "Running feature file: $file"
+                npm run test -- $file
               }
+            } else {
+              Write-Host "No feature files found for the selected test type in folder $folder."
             }
           }
 
