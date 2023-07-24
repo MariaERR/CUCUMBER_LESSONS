@@ -1,3 +1,49 @@
-<!-- The contents of this file are generated dynamically by the create-folder-selection-ui.js script. -->
-<!-- The folder names are displayed as checkboxes for the user to select. -->
-<!-- This file will be uploaded as an artifact in the workflow. -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Folder Selection</title>
+</head>
+<body>
+  <h1>Select Folders to Execute Tests</h1>
+  <form action="https://api.github.com/repos/${{ github.repository }}/dispatches" method="POST">
+    <input type="hidden" name="event_type" value="folder-selection">
+    <label for="folder-names">Folders:</label>
+    <select id="folder-names" name="client_payload[folder-names]" multiple>
+      <!-- Use JavaScript to populate the options from the uploaded artifact -->
+    </select>
+    <label for="environment">Environment:</label>
+    <input type="text" id="environment" name="client_payload[environment]" required>
+    <label for="test-type">Test Type:</label>
+    <select id="test-type" name="client_payload[test-type]">
+      <option value="Nonreg">Nonreg</option>
+      <option value="All Tests">All Tests</option>
+    </select>
+    <input type="submit" value="Run Tests">
+  </form>
+  <script>
+    fetch('/repos/${{ github.repository }}/actions/artifacts/folder-selection')
+      .then(response => response.json())
+      .then(data => {
+        const folderNamesInput = document.getElementById('folder-names');
+        data.artifacts[0].archive_download_url = data.artifacts[0].archive_download_url.replace('{archive_format}', 'zip');
+        folderNamesInput.innerHTML = '';
+        fetch(data.artifacts[0].archive_download_url)
+          .then(response => response.blob())
+          .then(blob => {
+            const zip = new JSZip();
+            zip.loadAsync(blob).then(zip => {
+              zip.file('folders.json').async('string').then(content => {
+                const folders = JSON.parse(content).folderNames.split(',');
+                for (const folder of folders) {
+                  const option = document.createElement('option');
+                  option.value = folder.trim();
+                  option.innerText = folder.trim();
+                  folderNamesInput.appendChild(option);
+                }
+              });
+            });
+          });
+      });
+  </script>
+</body>
+</html>
