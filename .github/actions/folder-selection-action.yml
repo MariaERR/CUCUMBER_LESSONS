@@ -1,24 +1,21 @@
-name: 'Folder Selection Action'
+name: folder-selection-action
 
-inputs:
-  folder-names:
-    description: 'Comma-separated list of available folder names'
-    required: true
-    default: ''
+on:
+  workflow_dispatch:
+    inputs:
+      folder-names:
+        description: 'Select the folders to execute tests (use comma for multi-select)'
 
-runs:
-  using: composite
-  steps:
-    - name: Display Folder Selection
-      shell: pwsh
-      run: |
-        $folderNames = '${{ inputs.folder-names }}' -split ','
-        $selectedFolders = @()
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create folders input JSON file
+        run: |
+          echo '{"folderNames": "${{ github.event.inputs.folder-names }}" }' > folders.json
 
-        foreach ($folderName in $folderNames) {
-          $selected = ('false', 'true' -contains $env:{{ $folderName }})
-          $selectedFolders += $folderName * $selected
-          echo "::set-output name=${folderName}::${selected}"
-        }
-
-        echo "::set-output name=selected-folders::${selectedFolders -join ','}"
+      - name: Upload folder selection artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: folder-selection
+          path: folders.json
