@@ -12,6 +12,30 @@ on:
       Test2:
         type: boolean
         description: 'Test2'
+      sgnum1:
+        type: boolean
+        description: 'sgnum1'
+      sgnum2:
+        type: boolean
+        description: 'sgnum2'
+      sgnum3:
+        type: boolean
+        description: 'sgnum3'
+      sgnum4:
+        type: boolean
+        description: 'sgnum4'
+      sgnum5:
+        type: boolean
+        description: 'sgnum5'
+      sgnum6:
+        type: boolean
+        description: 'sgnum6'
+      sgnum7:
+        type: boolean
+        description: 'sgnum7'
+      sgnum8:
+        type: boolean
+        description: 'sgnum8'
       test-type:
         type: choice
         description: 'Select the type of test'
