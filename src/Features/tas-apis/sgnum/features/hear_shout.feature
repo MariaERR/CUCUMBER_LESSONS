@@ -1,4 +1,3 @@
-
  Feature: Hear shout
  @nonreg
  Scenario: Listener in within range
