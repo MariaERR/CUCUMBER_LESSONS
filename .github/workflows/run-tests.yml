@@ -30,13 +30,6 @@ on:
       sgnum6:
         type: boolean
         description: 'sgnum6'
-      sgnum7:
-        type: boolean
-        description: 'sgnum7'
-      sgnum8:
-        type: boolean
-        description: 'sgnum8'
-        
       test-type:
         type: choice
         description: 'Select the type of test'
