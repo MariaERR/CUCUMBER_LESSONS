@@ -62,12 +62,12 @@ jobs:
         run: |
           $selectedFolders = @()
           if ("${{ github.event.inputs.sgnum }}" -eq 'true') { $selectedFolders += "sgnum" }
-           if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "sgnum1" }
-           if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "sgnum2" }
-           if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "sgnum3" }
-           if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "sgnum4" }
-           if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "sgnum5" }
-           if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "sgnum6" }
+           if ("${{ github.event.inputs.sgnum1 }}" -eq 'true') { $selectedFolders += "sgnum1" }
+           if ("${{ github.event.inputs.sgnum2 }}" -eq 'true') { $selectedFolders += "sgnum2" }
+           if ("${{ github.event.inputs.sgnum3 }}" -eq 'true') { $selectedFolders += "sgnum3" }
+           if ("${{ github.event.inputs.sgnum4 }}" -eq 'true') { $selectedFolders += "sgnum4" }
+           if ("${{ github.event.inputs.sgnum5 }}" -eq 'true') { $selectedFolders += "sgnum5" }
+           if ("${{ github.event.inputs.sgnum6 }}" -eq 'true') { $selectedFolders += "sgnum6" }
           if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "Test2" }
           Write-Host "Selected folders: $selectedFolders" 
           $selectedFoldersString = $selectedFolders -join ','
