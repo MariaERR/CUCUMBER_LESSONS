@@ -36,6 +36,7 @@ on:
       sgnum8:
         type: boolean
         description: 'sgnum8'
+        
       test-type:
         type: choice
         description: 'Select the type of test'
