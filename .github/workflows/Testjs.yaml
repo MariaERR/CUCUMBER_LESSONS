@@ -1,0 +1,140 @@
+name: Run Test JS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+        description: Select the environment
+      sgnum:
+        type: boolean
+        description: 'Select the sgnum folder'
+      Test2:
+        type: boolean
+        description: 'Select the Test2 folder'
+      sgnum1:
+        type: boolean
+        description: 'Select the sgnum1 folder'
+      sgnum2:
+        type: boolean
+        description: 'Select the sgnum2 folder'
+      # Add more folders as needed
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      # Add your custom form with checkboxes for folders here
+      - name: Display Custom Form
+        id: custom-form
+        run: |
+          echo "name: Custom form"
+          echo "on:"
+          echo "  workflow_dispatch:"
+          echo "    inputs:"
+          echo "      environment:"
+          echo "        type: environment"
+          echo "        description: Select the environment"
+          echo "      sgnum:"
+          echo "        type: boolean"
+          echo "        description: 'Select the sgnum folder'"
+          echo "      Test2:"
+          echo "        type: boolean"
+          echo "        description: 'Select the Test2 folder'"
+          echo "      sgnum1:"
+          echo "        type: boolean"
+          echo "        description: 'Select the sgnum1 folder'"
+          echo "      sgnum2:"
+          echo "        type: boolean"
+          echo "        description: 'Select the sgnum2 folder'"
+          # Add more folders as needed
+          echo "jobs:"
+          echo "  build:"
+          echo "    runs-on: ubuntu-latest"
+          echo "    steps:"
+          echo "      - name: Display Inputs"
+          echo "        run: |"
+          echo "          Write-Host 'environment is ${{ github.event.inputs.environment }}'"
+          echo "          Write-Host 'sgnum folder selected: ${{ github.event.inputs.sgnum }}'"
+          echo "          Write-Host 'Test2 folder selected: ${{ github.event.inputs.Test2 }}'"
+          echo "          # Add more folder outputs here as needed"
+
+      - name: Set up Folder Selection
+        id: folder-selection
+        run: |
+          $selectedFolders = @()
+          if ("${{ github.event.inputs.sgnum }}" -eq 'true') { $selectedFolders += "sgnum" }
+          if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "Test2" }
+          if ("${{ github.event.inputs.sgnum1 }}" -eq 'true') { $selectedFolders += "sgnum1" }
+          if ("${{ github.event.inputs.sgnum2 }}" -eq 'true') { $selectedFolders += "sgnum2" }
+          # Add more folder selections here as needed
+          Write-Host "Selected folders: $selectedFolders" 
+          $selectedFoldersString = $selectedFolders -join ','
+          Write-Output "selected_folders=$selectedFoldersString" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+          Write-Host "Selected selectedFoldersString: $selectedFoldersString" 
+        shell: pwsh
+
+      - name: Run Tests
+        working-directory: ./src
+        run: |
+          npm install
+          
+          # Use split function to separate selected folders
+          $selectedFolders = $env:selected_folders -split ','
+
+          Write-Host "Selected folders: $($selectedFolders -join ',')"
+          Write-Host "Selected folders count: $($selectedFolders.Count)"
+
+          $testType = "${{ github.event.inputs.test-type }}"
+
+          foreach ($folder in $selectedFolders) {
+            $env:FOLDER_NAME = $folder
+            Write-Host "Running tests for folder: $env:FOLDER_NAME"
+            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
+            Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
+
+            # Check if the folder exists
+            if (Test-Path -Path $env:FEATURE_PATH) {
+              # Create an empty array to store feature files
+              $featureFiles = @()
+
+              # Search for feature files based on test type selection
+              if ("${{ github.event.inputs.test-type }}" -eq 'All Tests') {
+                Write-Host "Running All Test Feature Files"
+                $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object { $_.FullName -replace '\\', '/' }
+              }
+              elseif ("${{ github.event.inputs.test-type }}" -eq 'Nonreg') {
+                Write-Host "Running Nonreg Feature Files"
+                $featureFiles = Get-ChildItem -Path $env:FEATURE_PATH -Filter "*.feature" -Recurse | ForEach-Object {
+                  $content = Get-Content $_
+                  if ($content -match '@nonreg') { $_.FullName -replace '\\', '/' }
+                }
+              } else {
+                Write-Host "Please select a valid test type."
+                exit 1
+              }
+
+              # Check if feature files were found and run the tests
+              if ($featureFiles.Count -gt 0) {
+                # Loop through the feature files and run the tests
+                foreach ($file in $featureFiles) {
+                  Write-Host "Running feature file: $file"
+                  npm run test -- $file
+                }
+              } else {
+                Write-Host "No feature files found for the selected test type in folder $folder."
+              }
+            } else {
+              Write-Host "Folder $folder does not exist."
+            }
+          }
+          Write-Host "All folders completed."
