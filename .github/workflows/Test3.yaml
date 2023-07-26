@@ -21,10 +21,6 @@ jobs:
         with:
           node-version: 14
 
-      - name: Install jq
-        run: |
-          Invoke-WebRequest -Uri "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-win64.exe" -OutFile "jq.exe"
-
       - name: List Folders
         id: list_folders
         run: |
