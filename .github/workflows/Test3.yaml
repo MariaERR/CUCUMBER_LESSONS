@@ -1,11 +1,11 @@
-name: Test3
+name: Run-tests-workflow
 
 on:
   workflow_dispatch:
     inputs:
       folder-names:
         description: 'Select the folder(s) to execute tests'
-        required: false
+        required: true
         type: choice
 
 jobs:
@@ -25,11 +25,10 @@ jobs:
           node ./.github/actions/generate_dropdown.js
 
       - name: Set Dropdown Options
-        env:
-          OPTIONS: ${{ env.OPTIONS }}
+        id: set-options
         run: |
-          echo $OPTIONS > env.list
+          echo "OPTIONS=$(cat options.json)" >> $GITHUB_ENV
 
       - name: Display Inputs
         run: |
-          echo "Dropdown options: $OPTIONS"
+          echo "Dropdown options: ${{ env.OPTIONS }}"
