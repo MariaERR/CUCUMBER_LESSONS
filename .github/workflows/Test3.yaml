@@ -7,7 +7,6 @@ on:
         description: 'Select the folder(s) to execute tests'
         required: true
         type: choice
-        options: ${{ steps.generate-dropdown.outputs.options }}
 
 jobs:
   myJob:
@@ -24,8 +23,11 @@ jobs:
         id: generate-dropdown
         run: |
           node ./.github/actions/generate_dropdown.js
-          echo "::set-output name=options::$(cat options.json)"
+
+      - name: Set Dropdown Options
+        run: |
+          echo "::set-env name=OPTIONS::$(cat options.json)"
 
       - name: Display Inputs
         run: |
-          echo "Dropdown options: ${{ steps.generate-dropdown.outputs.options }}"
+          echo "Dropdown options: ${{ env.OPTIONS }}"
