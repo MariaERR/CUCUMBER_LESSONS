@@ -1,0 +1,67 @@
+name: Run-tests-workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+        description: Select the environment
+      test-type:
+        type: choice
+        description: 'Select the type of test'
+        options:
+          - Nonreg
+          - All Tests
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install jq
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-win64.exe" -OutFile "jq.exe"
+
+      - name: Read Folder Config
+        id: read_folders
+        run: |
+          FOLDERS=$(jq -r '.folders | join(",")' ./.github/actions/folders_config.json)
+          echo "::set-output name=folders::$FOLDERS"
+
+      - name: Display Inputs
+        run: |
+          Write-Host "environment is ${{ github.event.inputs.environment }}"
+          Write-Host "test-type is ${{ github.event.inputs.test-type }}"
+          Write-Host "Selected folders: ${{ steps.read_folders.outputs.folders }}" 
+
+      - name: Run Tests
+        working-directory: ./src
+        run: |
+          npm install
+
+          # Use split function to separate selected folders
+          $selectedFolders = "${{ steps.read_folders.outputs.folders }}" -split ','
+
+          Write-Host "Selected folders: $($selectedFolders -join ',')"
+          Write-Host "Selected folders count: $($selectedFolders.Count)"
+
+          $testType = "${{ github.event.inputs.test-type }}"
+
+          foreach ($folder in $selectedFolders) {
+            $env:FOLDER_NAME = $folder
+            Write-Host "Running tests for folder: $env:FOLDER_NAME"
+            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
+            Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
+
+            # ... Rest of the script to run tests for each folder ...
+          }
+
+          Write-Host "All folders completed."
