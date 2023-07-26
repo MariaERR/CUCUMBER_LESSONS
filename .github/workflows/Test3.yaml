@@ -9,6 +9,8 @@ on:
       folders:
         type: choice
         description: 'Select the type of test'
+        options:
+          - ${{ join(glob('src/Features/tas-apis/*'), '\n') }}
       test-type:
         type: choice
         description: 'Select the type of test'
