@@ -1,0 +1,15 @@
+config:
+  folders:
+    - name: sgnum
+      selected: false
+    - name: Test2
+      selected: false
+    - name: sgnum1
+      selected: false
+    - name: sgnum2
+      selected: false
+    # Add more folders as needed
+
+# Additional root keys can be added here
+key1: value1
+key2: value2
