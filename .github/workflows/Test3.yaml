@@ -1,4 +1,4 @@
-name: CI
+name: Run Tests
 
 on:
   workflow_dispatch:
@@ -6,13 +6,46 @@ on:
       environment:
         type: environment
         description: Select the environment
-      folder:
+
+      sgnum:
+        type: boolean
+        description: 'sgnum'
+      Test2:
+        type: boolean
+        description: 'Test2'
+      sgnum1:
+        type: boolean
+        description: 'sgnum1'
+      sgnum2:
+        type: boolean
+        description: 'sgnum2'
+      sgnum3:
+        type: boolean
+        description: 'sgnum3'
+      sgnum4:
+        type: boolean
+        description: 'sgnum4'
+      sgnum5:
+        type: boolean
+        description: 'sgnum5'
+      sgnum6:
+        type: boolean
+        description: 'sgnum6'
+      sgnum7:
+        type: boolean
+        description: 'sgnum7'
+      sgnum8:
+        type: boolean
+        description: 'sgnum8'
+      sgnum9:
+        type: boolean
+        description: 'sgnum9'
+      test-type:
         type: choice
-        description: 'Select the folder of test'
+        description: 'Select the type of test'
         options:
           - Nonreg
           - All Tests
-          - Test3
 
 jobs:
   build:
@@ -30,20 +63,45 @@ jobs:
       - name: Display Inputs
         run: |
           Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "folder-names is ${{ github.event.inputs.folder-names }}"
+          Write-Host "sgnum folder selected: ${{ github.event.inputs.sgnum }}"
+          Write-Host "Test2 folder selected: ${{ github.event.inputs.Test2 }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
 
+      - name: Set up Folder Selection
+        id: folder-selection
+        run: |
+          $selectedFolders = @()
+          if ("${{ github.event.inputs.sgnum }}" -eq 'true') { $selectedFolders += "sgnum" }
+           if ("${{ github.event.inputs.sgnum1 }}" -eq 'true') { $selectedFolders += "sgnum1" }
+           if ("${{ github.event.inputs.sgnum2 }}" -eq 'true') { $selectedFolders += "sgnum2" }
+           if ("${{ github.event.inputs.sgnum3 }}" -eq 'true') { $selectedFolders += "sgnum3" }
+           if ("${{ github.event.inputs.sgnum4 }}" -eq 'true') { $selectedFolders += "sgnum4" }
+           if ("${{ github.event.inputs.sgnum5 }}" -eq 'true') { $selectedFolders += "sgnum5" }
+           if ("${{ github.event.inputs.sgnum6 }}" -eq 'true') { $selectedFolders += "sgnum6" }
+          if ("${{ github.event.inputs.Test2 }}" -eq 'true') { $selectedFolders += "Test2" }
+          Write-Host "Selected folders: $selectedFolders" 
+          $selectedFoldersString = $selectedFolders -join ','
+          Write-Output "selected_folders=$selectedFoldersString" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
+           Write-Host "Selected selectedFoldersString: $selectedFoldersString" 
+        shell: pwsh
       - name: Run Tests
         working-directory: ./src
         run: |
           npm install
-          $folderNames = "${{ github.event.inputs.folder-names }}" -split ','
 
-          foreach ($folderName in $folderNames) {
-            $env:FOLDER_NAME = $folderName
-            Write-Host "FOLDER_NAME : $env:FOLDER_NAME"
-            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
-            Write-Host "FEATURE_PATH : $env:FEATURE_PATH"
+                # Use split function to separate selected folders
+                $selectedFolders = $env:selected_folders -split ','
+
+                Write-Host "Selected folders: $($selectedFolders -join ',')"
+                Write-Host "Selected folders count: $($selectedFolders.Count)"
+
+                $testType = "${{ github.event.inputs.test-type }}"
+
+                foreach ($folder in $selectedFolders) {
+                  $env:FOLDER_NAME = $folder
+                  Write-Host "Running tests for folder: $env:FOLDER_NAME"
+                  $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
+                  Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
 
             # Check if the folder exists
             if (Test-Path -Path $env:FEATURE_PATH) {
@@ -80,5 +138,4 @@ jobs:
               Write-Host "Folder $folderName does not exist."
             }
           }
-
           Write-Host "All folders completed."
