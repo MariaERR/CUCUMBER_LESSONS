@@ -6,6 +6,8 @@ on:
       environment:
         type: environment
         description: Select the environment
+
+      # Input block 1
       sgnum:
         type: boolean
         description: 'sgnum'
@@ -21,6 +23,8 @@ on:
       sgnum3:
         type: boolean
         description: 'sgnum3'
+
+      # Input block 2
       sgnum4:
         type: boolean
         description: 'sgnum4'
@@ -36,6 +40,8 @@ on:
       sgnum8:
         type: boolean
         description: 'sgnum8'
+
+      # Input block 3
       sgnum9:
         type: boolean
         description: 'sgnum9'
