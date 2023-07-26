@@ -5,7 +5,7 @@ on:
     inputs:
       folder-name:
         description: 'Select the folder to execute tests'
-        required: true
+        required: false
         type: choice  # Set the input type to 'choice'
 
 jobs:
@@ -13,6 +13,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq
+
       - name: Checkout Repository
         uses: actions/checkout@v2
 
@@ -24,17 +29,13 @@ jobs:
       - name: List Folders
         id: list_folders
         run: |
-          ls -l ./CUCUMBER_LESSONS/src/Features/tas-apis
-          FOLDERS=$(ls ./CUCUMBER_LESSONS/src/Features/tas-apis)
-          FOLDER_LIST=($FOLDERS)
-          echo "::set-output name=folder_list::${FOLDER_LIST[*]}"
-
+          node ./.github/actions/list_folders.js
 
       - name: Show Folder Selection
         id: folder_selection
         run: |
-          FOLDER_LIST="${{ steps.list_folders.outputs.folder_list }}"
-          FOLDER_CHOICES=$(IFS=,; echo "${FOLDER_LIST[*]}")
+          FOLDER_LIST="${{ steps.list_folders.outputs.stdout }}"
+          FOLDER_CHOICES=$(echo $FOLDER_LIST | jq -r '.[]')
           echo "::set-output name=folder_choices::$FOLDER_CHOICES"
 
       - name: Display Folder Selection
