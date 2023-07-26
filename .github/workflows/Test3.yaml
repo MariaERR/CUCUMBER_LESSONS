@@ -9,8 +9,7 @@ on:
       folders:
         type: choice
         description: 'Select the type of test'
-        options:
-          - ${{ join(glob('src/Features/tas-apis/*'), '\n') }}
+        options: ${{ steps.get_folders.outputs.folders }}
       test-type:
         type: choice
         description: 'Select the type of test'
@@ -30,6 +29,10 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
+          
+      - name: Get Folders
+        id: get_folders
+        run: node get_folders.js
 
       - name: Display Inputs
         run: |
