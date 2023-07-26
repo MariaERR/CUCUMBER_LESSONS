@@ -29,12 +29,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
-          
-      - name: get folders
-        id: get_folders
-        run: |
-          node scripts/get_folders.js
-          echo "::set-output name=folders::$(node scripts/get_folders.js)"
 
 
       - name: Display Inputs
