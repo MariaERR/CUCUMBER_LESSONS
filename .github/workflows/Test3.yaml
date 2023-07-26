@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       folder-names:
-        description: 'Select the folder(s) to execute tests'
-        required: true
-        type: choice
-         options :
-            -test1
-            -test2
-            -test3
+      type: choice
+      description: 'Select the folder(s) to execute tests'
+      options:
+        - test1
+        - test2
+        - test3
+
 jobs:
   myJob:
     name: "My job"
