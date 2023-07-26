@@ -5,8 +5,9 @@ on:
     inputs:
       folder-names:
         description: 'Select the folder(s) to execute tests'
-        required: false
+        required: true
         type: choice
+        default: ${{ fromJson(file('.github/actions/env.list')) }}
 
 jobs:
   myJob:
