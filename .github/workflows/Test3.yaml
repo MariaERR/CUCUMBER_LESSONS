@@ -9,6 +9,8 @@ on:
       folder-names:
         type: choice
         description: 'Enter the folders to execute tests'
+        options: ${{ steps.get_folders.outputs.folders }}  # Use the output from get_folders.js
+
       test-type:
         type: choice
         description: 'Select the type of test'
