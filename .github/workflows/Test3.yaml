@@ -5,7 +5,7 @@ on:
     inputs:
       folder-name:
         description: 'Select the folder to execute tests'
-        required: true
+        required: false
         type: choice  # Set the input type to 'choice'
 
 jobs:
