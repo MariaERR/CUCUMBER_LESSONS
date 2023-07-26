@@ -6,9 +6,13 @@ on:
       environment:
         type: environment
         description: Select the environment
-      folder-names:
-        type: string
-        description: 'Enter the folders to execute tests (use comma for multi-select)'
+      folder:
+        type: choice
+        description: 'Select the folder of test'
+        options:
+          - Nonreg
+          - All Tests
+          - Test3
 
 jobs:
   build:
