@@ -3,41 +3,28 @@ name: Run-tests-workflow
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        type: environment
-        description: Select the environment
-      test-type:
-        type: choice
-        description: 'Select the type of test'
-        options:
-          - Nonreg
-          - All Tests
+      PARAMETERS:
+        description: "A JSON object with folder list"
+        required: true
 
 jobs:
-  build:
-    runs-on: windows-latest
-
+  myJob:
+    name: "My job"
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-
-      - name: Install jq
+      - name: Setup inputs from json
+        id: setup-inputs
         run: |
-          Invoke-WebRequest -Uri "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-win64.exe" -OutFile "jq.exe"
-
-      - name: Read Folder Config
-        id: read_folders
-        run: |
-          FOLDERS=$(jq -r '.folders | join(",")' ./.github/actions/folders_config.json)
-          echo "::set-output name=folders::$FOLDERS"
+          # Read the JSON file and pass it as a JSON object to the workflow_dispatch popup
+          INPUT_JSON=$(cat folders_config.json)
+          echo "::set-output name=parameters::'$INPUT_JSON'"
 
       - name: Display Inputs
         run: |
+          echo "Parameters: ${{ steps.setup-inputs.outputs.parameters }}"
           Write-Host "environment is ${{ github.event.inputs.environment }}"
           Write-Host "test-type is ${{ github.event.inputs.test-type }}"
           Write-Host "Selected folders: ${{ steps.read_folders.outputs.folders }}" 
