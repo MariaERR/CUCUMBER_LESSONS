@@ -1,4 +1,4 @@
-name: Run-tests-workflow
+name: Test3
 
 on:
   workflow_dispatch:
@@ -25,9 +25,11 @@ jobs:
           node ./.github/actions/generate_dropdown.js
 
       - name: Set Dropdown Options
+        env:
+          OPTIONS: ${{ env.OPTIONS }}
         run: |
-          echo "::set-env name=OPTIONS::$(cat options.json)"
+          echo $OPTIONS > env.list
 
       - name: Display Inputs
         run: |
-          echo "Dropdown options: ${{ env.OPTIONS }}"
+          echo "Dropdown options: $OPTIONS"
