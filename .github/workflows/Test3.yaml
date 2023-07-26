@@ -24,9 +24,11 @@ jobs:
       - name: List Folders
         id: list_folders
         run: |
-          FOLDERS=$(ls ./src/Features/tas-apis)
+          ls -l ./CUCUMBER_LESSONS/src/Features/tas-apis
+          FOLDERS=$(ls ./CUCUMBER_LESSONS/src/Features/tas-apis)
           FOLDER_LIST=($FOLDERS)
           echo "::set-output name=folder_list::${FOLDER_LIST[*]}"
+
 
       - name: Show Folder Selection
         id: folder_selection
