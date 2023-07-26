@@ -5,4 +5,4 @@ const folders = require(folderList).folders;
 
 const options = folders.map((folder) => ({ "value": folder, "label": folder }));
 
-console.log(JSON.stringify(options));
+fs.writeFileSync('./options.json', JSON.stringify(options));
