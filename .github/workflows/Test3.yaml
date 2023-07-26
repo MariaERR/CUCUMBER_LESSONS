@@ -3,42 +3,29 @@ name: Run-tests-workflow
 on:
   workflow_dispatch:
     inputs:
-      folder-name:
-        description: 'Select the folder to execute tests'
-        required: false
-        type: choice  # Set the input type to 'choice'
+      folder-names:
+        description: 'Select the folder(s) to execute tests'
+        required: true
+        type: choice
+        options: ${{ steps.generate-dropdown.outputs.options }}
 
 jobs:
-  build:
-    runs-on: windows-latest
-
+  myJob:
+    name: "My job"
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install jq -y
 
-      - name: List Folders
-        id: list_folders
+      - name: Generate Dropdown Options
+        id: generate-dropdown
         run: |
-          node ./.github/actions/list_folders.js
+          node ./.github/actions/generate_dropdown.js
+          echo "::set-output name=options::$(cat options.json)"
 
-      - name: Show Folder Selection
-        id: folder_selection
+      - name: Display Inputs
         run: |
-          FOLDER_LIST="${{ steps.list_folders.outputs.stdout }}"
-          FOLDER_CHOICES=$(echo $FOLDER_LIST | ./.github/actions/jq.exe -r '.[]')
-          echo "::set-output name=folder_choices::$FOLDER_CHOICES"
-
-      - name: Display Folder Selection
-        run: |
-          echo "Selected folder: ${{ github.event.inputs.folder-name }}"
-
-      - name: Run Tests
-        run: |
-          cd ./src
-          npm install
-          npm run test ./Features/tas-apis/${{ github.event.inputs.folder-name }}
+          echo "Dropdown options: ${{ steps.generate-dropdown.outputs.options }}"
