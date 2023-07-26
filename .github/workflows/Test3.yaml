@@ -7,7 +7,10 @@ on:
         description: 'Select the folder(s) to execute tests'
         required: true
         type: choice
-
+         options :
+            -test1
+            -test2
+            -test3
 jobs:
   myJob:
     name: "My job"
