@@ -36,6 +36,16 @@ on:
         options:
           - Nonreg
           - All Tests
+          - Nonreg
+          - All Tests
+          - Nonreg
+          - All Tests
+           - Nonreg
+          - All Tests
+          - Nonreg
+          - All Tests
+          - Nonreg
+          - All Tests
 
 jobs:
   build:
