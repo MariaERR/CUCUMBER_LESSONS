@@ -5,7 +5,7 @@ on:
     inputs:
       folder-name:
         description: 'Select the folder to execute tests'
-        required: false
+        required: true
         type: choice  # Set the input type to 'choice'
 
 jobs:
@@ -13,11 +13,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Install jq
-        run: |
-          sudo apt-get update
-          sudo apt-get install jq
-
       - name: Checkout Repository
         uses: actions/checkout@v2
 
@@ -25,6 +20,10 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
+
+      - name: Install jq
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-win64.exe" -OutFile "jq.exe"
 
       - name: List Folders
         id: list_folders
@@ -35,7 +34,7 @@ jobs:
         id: folder_selection
         run: |
           FOLDER_LIST="${{ steps.list_folders.outputs.stdout }}"
-          FOLDER_CHOICES=$(echo $FOLDER_LIST | jq -r '.[]')
+          FOLDER_CHOICES=$(echo $FOLDER_LIST | ./.github/actions/jq.exe -r '.[]')
           echo "::set-output name=folder_choices::$FOLDER_CHOICES"
 
       - name: Display Folder Selection
