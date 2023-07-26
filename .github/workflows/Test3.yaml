@@ -30,9 +30,12 @@ jobs:
         with:
           node-version: 14
           
-      - name: Get Folders
+      - name: get folders
         id: get_folders
-        run: node get_folders.js
+        run: |
+          node scripts/get_folders.js
+          echo "::set-output name=folders::$(node scripts/get_folders.js)"
+
 
       - name: Display Inputs
         run: |
