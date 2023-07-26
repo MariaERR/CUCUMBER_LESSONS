@@ -30,7 +30,9 @@ jobs:
         run: |
           FOLDERS=$(echo ${{ steps.list_folders.outputs.folders }} | jq -r '.[]')
           FOLDER_LIST=($FOLDERS)
-          SELECTED_FOLDER=$(echo "::set-output name=selected_folder::$FOLDER_LIST")
+          SELECTED_FOLDER=${FOLDER_LIST[0]}
+          echo "::set-output name=selected_folder::$SELECTED_FOLDER"
+
 
       - name: Display Folder Selection
         run: |
