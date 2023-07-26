@@ -3,8 +3,8 @@ name: Run-tests-workflow
 on:
   workflow_dispatch:
     inputs:
-      PARAMETERS:
-        description: "A JSON object with folder list"
+      folder-names:
+        description: 'Select the folder(s) to execute tests'
         required: true
 
 jobs:
@@ -15,40 +15,34 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Setup inputs from json
-        id: setup-inputs
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install jq -y
+
+      - name: Generate Dropdown Options
+        id: generate-dropdown
         run: |
-          # Read the JSON file and pass it as a JSON object to the workflow_dispatch popup
-          INPUT_JSON=$(cat folders_config.json)
-          echo "::set-output name=parameters::'$INPUT_JSON'"
+          node ./.github/actions/generate_dropdown.js
+          echo "::set-output name=options::$(cat options.json)"
 
       - name: Display Inputs
         run: |
-          echo "Parameters: ${{ steps.setup-inputs.outputs.parameters }}"
-          Write-Host "environment is ${{ github.event.inputs.environment }}"
-          Write-Host "test-type is ${{ github.event.inputs.test-type }}"
-          Write-Host "Selected folders: ${{ steps.read_folders.outputs.folders }}" 
+          echo "Dropdown options: ${{ steps.generate-dropdown.outputs.options }}"
 
       - name: Run Tests
-        working-directory: ./src
         run: |
           npm install
 
-          # Use split function to separate selected folders
-          $selectedFolders = "${{ steps.read_folders.outputs.folders }}" -split ','
+          # Use jq to parse the dropdown options and extract the selected folders
+          IFS=',' read -ra SELECTED_FOLDERS <<< "$(
+            echo "${{ steps.generate-dropdown.outputs.options }}" | 
+            jq -r '.[] | select(.selected == true) | .value' | 
+            paste -sd "," -
+          )"
 
-          Write-Host "Selected folders: $($selectedFolders -join ',')"
-          Write-Host "Selected folders count: $($selectedFolders.Count)"
+          echo "Selected folders: ${SELECTED_FOLDERS[*]}"
 
-          $testType = "${{ github.event.inputs.test-type }}"
-
-          foreach ($folder in $selectedFolders) {
-            $env:FOLDER_NAME = $folder
-            Write-Host "Running tests for folder: $env:FOLDER_NAME"
-            $env:FEATURE_PATH = "./Features/tas-apis/$env:FOLDER_NAME/features"
-            Write-Host "FEATURE_PATH: $env:FEATURE_PATH"
-
-            # ... Rest of the script to run tests for each folder ...
-          }
-
-          Write-Host "All folders completed."
+          # Run your tests for each selected folder
+          for folder in "${SELECTED_FOLDERS[@]}"; do
+            echo "Running tests for folder: $folder"
+            # ... Rest of your script to run tests for each folder ...
+          done
