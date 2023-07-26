@@ -1,5 +1,4 @@
 name: Run-tests-workflow
-
 on:
   workflow_dispatch:
     inputs:
@@ -10,7 +9,6 @@ on:
         - test1
         - test2
         - test3
-
 jobs:
   myJob:
     name: "My job"
