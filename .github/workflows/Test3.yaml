@@ -6,17 +6,10 @@ on:
       environment:
         type: environment
         description: Select the environment
-      folder-config:
-        type: string
-        description: 'Select the YAML/JSON file containing the folders and their states'
-        default: './path/to/default/folder-config.yml'
-      test-type:
-        type: string
-        description: 'Select the type of test (e.g., Nonreg or All Tests)'
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
@@ -30,16 +23,20 @@ jobs:
       - name: Read Config and Set Folders
         id: read-config
         run: |
-          node ./.github/actions/read_config.js >> selected_folders.txt
-        shell: pwsh
+          # Replace the command below with your custom script to read the JSON file and extract the selected folders
+          # For example, you can use Node.js or Python script to read the JSON
+          selectedFolders=$(node -e 'const config = require(".github/actions/folders_config.json"); const selectedFolders = config.folders.filter(folder => folder.selected).map(folder => folder.name); console.log(selectedFolders.join(","));')
+
+          # Store the selected folders in the GITHUB_ENV
+          echo "SELECTED_FOLDERS=$selectedFolders" >> $GITHUB_ENV
 
       # Add more steps for your build process as needed
 
       - name: Run Tests
         working-directory: ./src
         run: |
-          # Read the selected folders from the file
-          $selectedFolders = Get-Content selected_folders.txt
+          # Access the selected folders from the GITHUB_ENV variable
+          $selectedFolders = $env:SELECTED_FOLDERS
           Write-Host "Selected folders: $selectedFolders"
           # Use the selected folders or perform other actions based on the data
           # For example, you can use $selectedFolders in your test script
